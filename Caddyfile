@@ -1,0 +1,82 @@
+localhost {
+    # Reverse proxy to Node.js application
+    reverse_proxy /api/* app:3001 {
+        # WebSocket support
+        header_up Host {host}
+        header_up X-Real-IP {remote}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Proto {scheme}
+        
+        # WebSocket upgrade
+        transport http {
+            versions h1 h2c h2
+        }
+    }
+
+    # WebSocket endpoint
+    reverse_proxy /ws app:3001 {
+        header_up Host {host}
+        header_up X-Real-IP {remote}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Proto {scheme}
+        
+        transport http {
+            versions h1 h2c h2
+        }
+    }
+
+    # Security headers
+    header {
+        # HTTPS-related security headers
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        
+        # Content Security Policy
+        Content-Security-Policy "default-src 'self'; connect-src 'self' ws://localhost:* wss://localhost:*; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
+        
+        # Remove Server header
+        -Server
+    }
+
+    # Enable logging
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 10mb
+            roll_keep 10
+        }
+        format json
+    }
+
+    # Enable HTTPS for local development
+    tls internal
+
+    # Compression
+    encode gzip
+
+    # Handle errors
+    handle_errors {
+        respond "{http.error.status_code} {http.error.status_text}" {
+            close
+        }
+    }
+}
+
+# Health check endpoint
+health.localhost {
+    respond /health 200 {
+        body "OK"
+        close
+    }
+}
+
+# Metrics endpoint (if needed)
+metrics.localhost {
+    respond /metrics 200 {
+        body "OK"
+        close
+    }
+}
+
+
