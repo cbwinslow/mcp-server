@@ -1,0 +1,35 @@
+# CrewAI Agent Requirements
+# Dependencies for running AI agents with MCP server integration
+
+# Core CrewAI framework
+crewai>=0.1.0
+crewai-tools>=0.1.0
+
+# Web framework for MCP server communication
+requests>=2.31.0
+httpx>=0.25.0
+
+# Data processing and serialization
+pyyaml>=6.0
+pydantic>=2.0.0
+
+# Development and testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+
+# Logging and monitoring
+structlog>=23.1.0
+
+# Git operations for repository handling
+gitpython>=3.1.40
+
+# Optional: OpenAI integration (if using GPT models)
+openai>=1.0.0
+
+# Optional: For advanced embeddings (if needed)
+sentence-transformers>=2.2.0
+
+# Development tools
+black>=23.0.0
+isort>=5.12.0
+mypy>=1.5.0

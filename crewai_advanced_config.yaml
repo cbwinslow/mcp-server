@@ -1,0 +1,345 @@
+---
+# Advanced CrewAI Agent Configuration with Memory and Success Requirements
+# This configuration demonstrates sophisticated agent memory management and success monitoring
+
+# Enhanced CrewAI Configuration
+crewai_config:
+  name: "Advanced MCP Server Assistant"
+  description: "Intelligent crew for autonomous MCP server management with advanced memory and success tracking"
+  version: "2.0.0"
+  memory: true
+  verbose: true
+  process: "hierarchical"
+  max_rpm: 10  # Rate limiting for API calls
+  language: "en"
+
+# Advanced Agent Configurations with Memory
+agents:
+  - name: "Senior MCP Architect"
+    role: "Chief MCP Server Architect"
+    goal: "Design, optimize, and maintain MCP server infrastructure with strategic oversight"
+    backstory: |
+      You are a senior architect with 15+ years of experience in distributed systems,
+      data pipelines, and AI-powered automation. You excel at system design, performance
+      optimization, and strategic planning. You have deep knowledge of MCP protocols,
+      vector databases, and scalable ingestion systems.
+    llm: "gpt-4-turbo-preview"
+    memory:
+      type: "conversation_summary"
+      max_tokens: 4000
+      return_messages: true
+      memory_key: "architect_memory"
+    max_iterations: 15
+    allow_delegation: true
+    temperature: 0.7
+    tools:
+      - "mcp_server_status"
+      - "mcp_system_analyzer"
+      - "mcp_performance_optimizer"
+      - "mcp_capacity_planner"
+
+  - name: "Data Quality Guardian"
+    role: "Data Quality and Integrity Specialist"
+    goal: "Ensure data quality, integrity, and compliance across all MCP operations"
+    backstory: |
+      You are a data governance expert specializing in quality assurance, compliance,
+      and data integrity. You have extensive experience with automated quality checks,
+      data validation pipelines, and regulatory compliance frameworks.
+    llm: "gpt-4"
+    memory:
+      type: "conversation_buffer_window"
+      k: 50  # Keep last 50 interactions
+      memory_key: "quality_memory"
+    max_iterations: 12
+    allow_delegation: false
+    temperature: 0.3  # Lower temperature for consistent quality checks
+    tools:
+      - "codacy_analyze"
+      - "data_quality_scanner"
+      - "compliance_checker"
+      - "anomaly_detector"
+
+  - name: "Autonomous Harvester"
+    role: "Intelligent Repository Harvesting Agent"
+    goal: "Autonomously discover, harvest, and process GitHub repositories with ML-driven prioritization"
+    backstory: |
+      You are an autonomous harvesting specialist with expertise in machine learning,
+      repository analysis, and intelligent content processing. You can analyze repository
+      patterns, predict valuable content, and optimize harvesting strategies.
+    llm: "gpt-3.5-turbo-16k"
+    memory:
+      type: "vectorstore"
+      memory_key: "harvester_memory"
+      return_messages: true
+    max_iterations: 20
+    allow_delegation: true
+    temperature: 0.8
+    tools:
+      - "github_repo_search"
+      - "github_repo_clone"
+      - "content_extractor"
+      - "mcp_embeddings_generator"
+      - "repository_analyzer"
+
+# Advanced Task Definitions with Success Criteria
+tasks:
+  - name: "system_health_assessment"
+    description: "Perform comprehensive system health assessment with predictive analytics"
+    agent: "Senior MCP Architect"
+    expected_output: "Detailed health report with predictions, recommendations, and action plan"
+    context:
+      - "Analyze current system metrics"
+      - "Predict potential issues"
+      - "Provide optimization recommendations"
+      - "Create action plan with priorities"
+    async_execution: false
+    success_criteria:
+      - metric: "health_score"
+        threshold: 95
+        operator: ">="
+      - metric: "prediction_accuracy"
+        threshold: 85
+        operator: ">="
+
+  - name: "data_quality_audit"
+    description: "Conduct thorough data quality audit with automated remediation"
+    agent: "Data Quality Guardian"
+    expected_output: "Quality audit report with issues found, remediation actions, and compliance status"
+    context:
+      - "Scan all data sources"
+      - "Identify quality issues"
+      - "Generate remediation scripts"
+      - "Verify compliance requirements"
+    async_execution: true
+    success_criteria:
+      - metric: "quality_score"
+        threshold: 98
+        operator: ">="
+      - metric: "issues_resolved"
+        threshold: 100
+        operator: "=="
+
+  - name: "intelligent_harvesting"
+    description: "Execute intelligent repository harvesting with ML-based prioritization"
+    agent: "Autonomous Harvester"
+    expected_output: "Harvesting report with repositories processed, content extracted, and insights gained"
+    context:
+      - "Analyze trending repositories"
+      - "Prioritize based on value metrics"
+      - "Harvest and process content"
+      - "Generate harvesting insights"
+    async_execution: true
+    success_criteria:
+      - metric: "repos_harvested"
+        threshold: 50
+        operator: ">="
+      - metric: "content_quality_score"
+        threshold: 90
+        operator: ">="
+
+# Advanced Memory Configuration
+memory_config:
+  global_memory:
+    type: "conversation_summary_buffer"
+    max_token_limit: 8000
+    return_messages: true
+
+  agent_specific_memory:
+    architect:
+      type: "conversation_summary"
+      max_tokens: 4000
+      summarize_after_n_tokens: 2000
+
+    quality_guardian:
+      type: "conversation_buffer_window"
+      k: 50
+      return_messages: true
+
+    harvester:
+      type: "vectorstore"
+      embedding_model: "text-embedding-ada-002"
+      vectorstore: "chroma"
+      persist_directory: "./memory_store"
+
+# Comprehensive Success Requirements
+success_requirements:
+  - name: "system_reliability"
+    description: "Overall system reliability and uptime"
+    category: "reliability"
+    metrics:
+      - name: "uptime_percentage"
+        current_value: 99.9
+        target_value: 99.95
+        unit: "percent"
+        critical_threshold: 99.5
+      - name: "mttr"
+        current_value: 15
+        target_value: 10
+        unit: "minutes"
+        critical_threshold: 30
+
+  - name: "data_quality"
+    description: "Data quality and integrity metrics"
+    category: "quality"
+    metrics:
+      - name: "accuracy_score"
+        current_value: 97.5
+        target_value: 99.0
+        unit: "percent"
+        critical_threshold: 95.0
+      - name: "completeness_score"
+        current_value: 98.2
+        target_value: 99.5
+        unit: "percent"
+        critical_threshold: 97.0
+      - name: "consistency_score"
+        current_value: 96.8
+        target_value: 98.5
+        unit: "percent"
+        critical_threshold: 95.0
+
+  - name: "performance_efficiency"
+    description: "System performance and efficiency metrics"
+    category: "performance"
+    metrics:
+      - name: "avg_response_time"
+        current_value: 250
+        target_value: 200
+        unit: "milliseconds"
+        critical_threshold: 500
+        invert_threshold: true  # Lower is better
+      - name: "throughput_rate"
+        current_value: 150
+        target_value: 200
+        unit: "requests_per_minute"
+        critical_threshold: 100
+      - name: "resource_utilization"
+        current_value: 75
+        target_value: 80
+        unit: "percent"
+        critical_threshold: 90
+
+  - name: "harvesting_effectiveness"
+    description: "Repository harvesting effectiveness"
+    category: "effectiveness"
+    metrics:
+      - name: "harvest_success_rate"
+        current_value: 94.5
+        target_value: 96.0
+        unit: "percent"
+        critical_threshold: 90.0
+      - name: "content_value_score"
+        current_value: 87.3
+        target_value: 92.0
+        unit: "score"
+        critical_threshold: 85.0
+      - name: "processing_efficiency"
+        current_value: 78.9
+        target_value: 85.0
+        unit: "percent"
+        critical_threshold: 75.0
+
+# Advanced Tool Configurations
+tool_configs:
+  mcp_server_status:
+    timeout: 30
+    retries: 3
+    cache_ttl: 300  # 5 minutes
+
+  codacy_analyze:
+    timeout: 120
+    retries: 2
+    cache_ttl: 3600  # 1 hour
+
+  github_repo_search:
+    rate_limit: 30  # requests per minute
+    cache_ttl: 1800  # 30 minutes
+    max_results: 100
+
+  mcp_embeddings_generator:
+    batch_size: 50
+    timeout: 300
+    model: "text-embedding-ada-002"
+
+# Workflow Orchestration
+workflows:
+  daily_maintenance:
+    schedule: "0 2 * * *"  # Daily at 2 AM
+    tasks:
+      - "system_health_assessment"
+      - "data_quality_audit"
+    notifications:
+      - channel: "slack"
+        webhook_url: "${SLACK_WEBHOOK_URL}"
+        on_failure: true
+        on_success: false
+
+  continuous_harvesting:
+    schedule: "*/30 * * * *"  # Every 30 minutes
+    tasks:
+      - "intelligent_harvesting"
+    notifications:
+      - channel: "email"
+        recipients: ["admin@mcp-server.local"]
+        on_failure: true
+        on_success: false
+
+# Alerting and Monitoring
+alerting:
+  rules:
+    - name: "high_error_rate"
+      condition: "error_rate > 5"
+      severity: "critical"
+      channels: ["slack", "email", "pagerduty"]
+
+    - name: "low_quality_score"
+      condition: "quality_score < 95"
+      severity: "warning"
+      channels: ["slack"]
+
+    - name: "performance_degradation"
+      condition: "response_time > 500"
+      severity: "warning"
+      channels: ["slack"]
+
+  channels:
+    slack:
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+      channel: "#mcp-alerts"
+
+    email:
+      smtp_server: "smtp.gmail.com"
+      smtp_port: 587
+      username: "${EMAIL_USERNAME}"
+      password: "${EMAIL_PASSWORD}"
+      recipients: ["admin@mcp-server.local"]
+
+# Learning and Adaptation
+adaptation:
+  enabled: true
+  learning_rate: 0.1
+  adaptation_triggers:
+    - metric: "task_success_rate"
+      threshold: 0.8
+      action: "increase_autonomy"
+    - metric: "error_rate"
+      threshold: 0.1
+      action: "reduce_complexity"
+  model_update_interval: 86400  # 24 hours
+
+# Security and Compliance
+security:
+  encryption:
+    enabled: true
+    algorithm: "AES-256-GCM"
+    key_rotation_days: 90
+
+  audit:
+    enabled: true
+    log_level: "detailed"
+    retention_days: 365
+
+  compliance:
+    frameworks: ["GDPR", "SOC2", "ISO27001"]
+    automated_checks: true
+    reporting_interval: "monthly"

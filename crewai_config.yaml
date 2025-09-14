@@ -1,0 +1,223 @@
+---
+# CrewAI Agent Configuration for MCP Server Integration
+# This configuration creates AI agents that can interact with MCP servers and tools
+
+# Main CrewAI Configuration
+crewai_config:
+  name: "MCP Server Assistant"
+  description: "AI agent crew for managing MCP server operations and GitHub repository harvesting"
+  version: "1.0.0"
+  memory: true
+  verbose: true
+  process: "hierarchical"  # Options: sequential, hierarchical, consensual
+
+# Agent Definitions
+agents:
+  - name: "MCP Server Manager"
+    role: "MCP Server Operations Specialist"
+    goal: "Manage and optimize MCP server operations for GitHub repository ingestion and harvesting"
+    backstory: |
+      You are an expert MCP server administrator with deep knowledge of GitHub API integration,
+      data processing pipelines, and system optimization. You excel at maintaining high-performance
+      MCP servers and troubleshooting complex ingestion workflows.
+    llm: "gpt-4"  # Can be configured per agent
+    memory: true
+    max_iterations: 10
+    allow_delegation: true
+    tools:
+      - "mcp_server_status"
+      - "mcp_database_query"
+      - "mcp_github_crawler"
+      - "mcp_embeddings_generator"
+
+  - name: "Code Quality Analyst"
+    role: "Code Quality and Security Specialist"
+    goal: "Analyze code quality, security vulnerabilities, and provide improvement recommendations"
+    backstory: |
+      You are a senior code quality engineer specializing in automated analysis tools like Codacy,
+      security scanning, and code review automation. You have extensive experience with CI/CD
+      pipelines and quality gate implementation.
+    llm: "gpt-4"
+    memory: true
+    max_iterations: 8
+    allow_delegation: false
+    tools:
+      - "codacy_analyze"
+      - "security_scan"
+      - "code_review"
+
+  - name: "Repository Harvester"
+    role: "GitHub Repository Specialist"
+    goal: "Discover, harvest, and process GitHub repositories for the MCP knowledge base"
+    backstory: |
+      You are a GitHub ecosystem expert with specialized knowledge in repository discovery,
+      content extraction, and metadata processing. You understand the nuances of different
+      programming languages, project structures, and open source ecosystems.
+    llm: "gpt-3.5-turbo"
+    memory: true
+    max_iterations: 15
+    allow_delegation: true
+    tools:
+      - "github_repo_search"
+      - "github_repo_clone"
+      - "content_extractor"
+      - "metadata_processor"
+
+# Task Definitions
+tasks:
+  - name: "server_health_check"
+    description: "Perform comprehensive health check of MCP server components"
+    agent: "MCP Server Manager"
+    expected_output: "Health check report with status of all components and recommendations"
+    context: ["Check database connectivity", "Verify crawler status", "Test embeddings generation"]
+    async_execution: false
+
+  - name: "quality_analysis"
+    description: "Run automated code quality analysis on repository changes"
+    agent: "Code Quality Analyst"
+    expected_output: "Quality analysis report with issues, security findings, and fix recommendations"
+    context: ["Run Codacy analysis", "Check for security vulnerabilities", "Review code patterns"]
+    async_execution: true
+
+  - name: "repository_harvest"
+    description: "Harvest and process new GitHub repositories for the knowledge base"
+    agent: "Repository Harvester"
+    expected_output: "Harvested repository data with extracted content and metadata"
+    context: ["Search for repositories", "Clone and extract content", "Generate embeddings"]
+    async_execution: true
+
+# Custom Tool Definitions
+tools:
+  - name: "mcp_server_status"
+    type: "mcp_tool"
+    description: "Check MCP server status and component health"
+    parameters:
+      component: "all"  # Options: all, crawler, extractor, embeddings, database
+
+  - name: "mcp_database_query"
+    type: "mcp_tool"
+    description: "Execute queries against the MCP database"
+    parameters:
+      query_type: "select"  # Options: select, insert, update, delete
+      table: "repositories"
+
+  - name: "mcp_github_crawler"
+    type: "mcp_tool"
+    description: "Control GitHub repository crawling operations"
+    parameters:
+      action: "start"  # Options: start, stop, status, config
+      target: "all"
+
+  - name: "mcp_embeddings_generator"
+    type: "mcp_tool"
+    description: "Generate embeddings for harvested content"
+    parameters:
+      content_type: "code"  # Options: code, docs, metadata
+      batch_size: 100
+
+  - name: "codacy_analyze"
+    type: "external_tool"
+    description: "Run Codacy code analysis on files or projects"
+    parameters:
+      target: "file"  # Options: file, project, repository
+      tool: "auto"  # Options: auto, eslint, pylint, etc.
+
+  - name: "security_scan"
+    type: "external_tool"
+    description: "Perform security vulnerability scanning"
+    parameters:
+      scan_type: "dependency"  # Options: dependency, code, container
+      severity: "high"  # Options: low, medium, high, critical
+
+  - name: "github_repo_search"
+    type: "external_tool"
+    description: "Search for GitHub repositories based on criteria"
+    parameters:
+      query: ""
+      language: "python"
+      min_stars: 10
+      sort: "stars"
+
+  - name: "github_repo_clone"
+    type: "external_tool"
+    description: "Clone a GitHub repository for processing"
+    parameters:
+      repo_url: ""
+      destination: "/tmp/repos"
+      depth: 1
+
+# Memory Configuration
+memory:
+  type: "conversation_buffer"  # Options: conversation_buffer, conversation_summary, entity
+  max_tokens: 2000
+  return_messages: true
+
+# Success Criteria
+success_requirements:
+  - name: "server_uptime"
+    description: "MCP server maintains 99.9% uptime"
+    metric: "uptime_percentage"
+    threshold: 99.9
+    unit: "percent"
+
+  - name: "quality_score"
+    description: "Code quality score above threshold"
+    metric: "codacy_grade"
+    threshold: "A"
+    unit: "grade"
+
+  - name: "harvest_rate"
+    description: "Successfully harvest at least 100 repositories per day"
+    metric: "repos_harvested_daily"
+    threshold: 100
+    unit: "count"
+
+  - name: "processing_time"
+    description: "Average processing time under 5 minutes per repository"
+    metric: "avg_processing_time"
+    threshold: 300
+    unit: "seconds"
+
+# MCP Server Integration
+mcp_integration:
+  server_url: "http://localhost:3000"
+  api_key: "${MCP_API_KEY}"
+  timeout: 30
+  retry_attempts: 3
+  tools_namespace: "mcp"
+
+# External Service Configurations
+external_services:
+  github:
+    token: "${GITHUB_TOKEN}"
+    api_version: "2022-11-28"
+    rate_limit_buffer: 100
+
+  codacy:
+    api_token: "${CODACY_API_TOKEN}"
+    base_url: "https://api.codacy.com"
+    organization: "${CODACY_ORG}"
+
+  cloudflare:
+    account_id: "${CLOUDFLARE_ACCOUNT_ID}"
+    api_token: "${CLOUDFLARE_API_TOKEN}"
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "json"
+  handlers:
+    - "console"
+    - "file"
+  file_path: "logs/crewai_agent.log"
+
+# Environment Variables
+environment:
+  required_vars:
+    - "MCP_API_KEY"
+    - "GITHUB_TOKEN"
+    - "CODACY_API_TOKEN"
+    - "CLOUDFLARE_API_TOKEN"
+  optional_vars:
+    - "LOG_LEVEL"
+    - "DEBUG_MODE"
