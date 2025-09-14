@@ -46,6 +46,17 @@ agents:
       - "security_scan"
       - "code_review"
 
+  - name: "Documentation Specialist"
+    role: "Documentation and Knowledge Management Specialist"
+    goal: "Generate comprehensive, up-to-date documentation for the MCP server codebase and generate documentation from code analysis results"
+    backstory: |
+      You are a technical documentation expert with deep knowledge of software architecture, API documentation, and knowledge management systems. You specialize in creating clear, comprehensive documentation that helps developers understand complex systems and best practices.
+    llm: "gpt-4"
+    memory: true
+    max_iterations: 10
+    allow_delegation: false
+    tools:
+      - "code_review"
   - name: "Repository Harvester"
     role: "GitHub Repository Specialist"
     goal: "Discover, harvest, and process GitHub repositories for the MCP knowledge base"
@@ -73,11 +84,18 @@ tasks:
     async_execution: false
 
   - name: "quality_analysis"
-    description: "Run automated code quality analysis on repository changes"
+    description: "Run automated code quality analysis on the mcp_ingest MCP server codebase, analyzing structure, functionality, best practices, and potential improvements"
     agent: "Code Quality Analyst"
-    expected_output: "Quality analysis report with issues, security findings, and fix recommendations"
-    context: ["Run Codacy analysis", "Check for security vulnerabilities", "Review code patterns"]
+    expected_output: "Quality analysis report with issues, security findings, best practices violations, functionality review, and improvement recommendations for the mcp_ingest codebase"
+    context: ["Run Ruff analysis on mcp_ingest/", "Check for security vulnerabilities with Bandit", "Review code structure and patterns for best practices and improvements"]
     async_execution: true
+
+  - name: "documentation_generation"
+    description: "Generate comprehensive documentation for the MCP server codebase based on code review results and analysis"
+    agent: "Documentation Specialist"
+    expected_output: "Complete documentation including API references, architecture overview, code structure, best practices, and improvement suggestions for mcp_ingest"
+    context: ["Use code review results", "Analyze codebase structure", "Generate Markdown documentation", "Include best practices and recommendations"]
+    async_execution: false
 
   - name: "repository_harvest"
     description: "Harvest and process new GitHub repositories for the knowledge base"

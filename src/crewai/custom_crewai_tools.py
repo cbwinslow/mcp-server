@@ -264,12 +264,107 @@ class GitHubRepoSearchTool(BaseTool):
             return json.dumps(error_result, indent=2)
 
 # Tool registry for easy access
+class CodacyAnalyzeTool(BaseTool):
+    """Tool for code quality analysis using Ruff"""
+    name: str = "Codacy Analyze Tool"
+    description: str = "Run code quality analysis using Ruff on the MCP codebase"
+
+    def _run(self, target: str = "mcp_ingest/") -> str:
+        """
+        Run Ruff code analysis on the target directory
+        """
+        try:
+            result = subprocess.run(["ruff", "check", target], capture_output=True, text=True, timeout=60)
+            output = result.stdout if result.returncode == 0 else result.stderr
+            issues = len([line for line in output.split('\n') if ':' in line and ' ' in line.strip()]) if output else 0
+            return json.dumps({
+                "status": "success" if result.returncode == 0 else "issues_found",
+                "output": output,
+                "issue_count": issues,
+                "target": target
+            }, indent=2)
+        except Exception as e:
+            return json.dumps({"error": str(e), "status": "failed"}, indent=2)
+
+
+class SecurityScanTool(BaseTool):
+    """Tool for security vulnerability scanning using Bandit"""
+    name: str = "Security Scan Tool"
+    description: str = "Run security vulnerability scan using Bandit on the MCP codebase"
+
+    def _run(self, target: str = "mcp_ingest/", severity: str = "high") -> str:
+        """
+        Run Bandit security scan on the target directory
+        """
+        try:
+            cmd = ["bandit", "-r", target, "-f", "json"]
+            if severity != "all":
+                cmd += ["-s", severity.upper()]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+            if result.returncode == 0:
+                try:
+                    scan_results = json.loads(result.stdout)
+                    high_sev = len([i for i in scan_results.get('results', []) if i['issue_severity'] == 'HIGH'])
+                    med_sev = len([i for i in scan_results.get('results', []) if i['issue_severity'] == 'MEDIUM'])
+                    return json.dumps({
+                        "status": "success",
+                        "high_vulnerabilities": high_sev,
+                        "medium_vulnerabilities": med_sev,
+                        "total_issues": len(scan_results.get('results', [])),
+                        "output": result.stdout
+                    }, indent=2)
+                except json.JSONDecodeError:
+                    return json.dumps({"status": "success", "output": result.stdout, "issues": 0}, indent=2)
+            else:
+                return json.dumps({"status": "issues_found", "output": result.stderr, "issues": "See output"}, indent=2)
+        except Exception as e:
+            return json.dumps({"error": str(e), "status": "failed"}, indent=2)
+
+
+class CodeReviewTool(BaseTool):
+    """Tool for comprehensive code review combining quality and security analysis"""
+    name: str = "Code Review Tool"
+    description: str = "Perform comprehensive code review on the MCP codebase using Ruff and Bandit"
+
+    def _run(self, target: str = "mcp_ingest/") -> str:
+        """
+        Run combined code review: quality analysis + security scan + summary
+        """
+        quality_tool = CodacyAnalyzeTool()
+        security_tool = SecurityScanTool()
+        
+        quality_result = quality_tool._run(target)
+        security_result = security_tool._run(target)
+        
+        try:
+            quality_json = json.loads(quality_result)
+            security_json = json.loads(security_result)
+            
+            summary = {
+                "target": target,
+                "quality_analysis": quality_json,
+                "security_scan": security_json,
+                "recommendations": [
+                    "Address all high-severity security issues immediately.",
+                    "Fix Ruff-detected code quality issues for better maintainability.",
+                    "Review functionality for adherence to MCP server best practices.",
+                    "Consider adding more comprehensive tests for edge cases.",
+                    "Ensure proper error handling and logging throughout the codebase."
+                ],
+                "overall_status": "review_completed"
+            }
+            return json.dumps(summary, indent=2)
+        except Exception as e:
+            return json.dumps({"error": str(e), "status": "failed", "quality": quality_result, "security": security_result}, indent=2)
 TOOL_REGISTRY = {
     "mcp_server_status": MCPServerStatusTool,
     "mcp_database_query": MCPDatabaseQueryTool,
     "mcp_github_crawler": MCPGitHubCrawlerTool,
     "mcp_embeddings_generator": MCPEmbeddingsGeneratorTool,
     "github_repo_search": GitHubRepoSearchTool,
+    "codacy_analyze": CodacyAnalyzeTool,
+    "security_scan": SecurityScanTool,
+    "code_review": CodeReviewTool,
 }
 
 def get_tool(tool_name: str, **kwargs) -> Any:
