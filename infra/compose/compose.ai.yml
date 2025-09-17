@@ -1,0 +1,61 @@
+version: "3.9"
+
+# Optional AI/operator tooling: Langfuse telemetry, LocalAI (OpenAI-compatible), OpenWebUI.
+# Enable selectively via: docker compose -f compose.ai.yml --profile ai up -d
+
+name: mcp-ai
+
+profiles:
+  - ai
+
+networks:
+  net_back:
+    external: true
+  net_db:
+    external: true
+
+volumes:
+  langfuse_data: {}
+  localai_models: {}
+
+services:
+  langfuse:
+    image: langfuse/langfuse:latest
+    container_name: langfuse
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${LANGFUSE_DATABASE_URL}
+      NEXTAUTH_SECRET: ${LANGFUSE_NEXTAUTH_SECRET}
+      NEXTAUTH_URL: ${LANGFUSE_PUBLIC_URL}
+      SALT: ${LANGFUSE_SALT}
+      ENCRYPTION_KEY: ${LANGFUSE_ENCRYPTION_KEY}
+    ports:
+      - "127.0.0.1:3101:3000"
+    networks:
+      - net_back
+
+  localai:
+    image: quay.io/go-skynet/local-ai:latest
+    container_name: localai
+    restart: unless-stopped
+    environment:
+      MODELS_PATH: /models
+      THREADS: 4
+    volumes:
+      - localai_models:/models
+    ports:
+      - "127.0.0.1:8082:8080"  # OpenAI-compatible endpoint
+    networks:
+      - net_back
+
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: openwebui
+    restart: unless-stopped
+    environment:
+      OLLAMA_BASE_URL: http://localai:8080/v1
+    ports:
+      - "127.0.0.1:8083:8080"
+    networks:
+      - net_back
+

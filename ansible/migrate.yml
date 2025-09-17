@@ -1,0 +1,20 @@
+---
+- hosts: mcp
+  become: true
+  vars:
+    repo_dir: /opt/mcp-server
+    compose_dir: "{{ repo_dir }}/infra/compose"
+    compose_file: docker-compose.prod.yml
+    api_service: api
+  tasks:
+    - name: Run Alembic migrations inside API container
+      community.docker.docker_compose_v2:
+        project_src: "{{ compose_dir }}"
+        files: [ "{{ compose_file }}" ]
+        state: present
+      register: compose
+
+    - name: Execute alembic upgrade head
+      command: docker compose -f {{ compose_dir }}/{{ compose_file }} exec -T {{ api_service }} alembic upgrade head
+      changed_when: true
+

@@ -1,0 +1,161 @@
+---
+- hosts: mcp
+  become: true
+  vars:
+    repo_dir: "{{ repo_dir | default('/opt/mcp-server') }}"
+    compose_dir: "{{ compose_dir | default(repo_dir + '/infra/compose') }}"
+    env_dir: "{{ env_dir | default(repo_dir + '/infra/prod') }}"
+    env_file: "{{ env_file | default(env_dir + '/.env') }}"
+  tasks:
+    - name: Ensure apt cache up to date
+      apt:
+        update_cache: yes
+
+    - name: Install Docker dependencies
+      apt:
+        name: ["ca-certificates", "curl", "gnupg", "lsb-release"]
+        state: present
+
+    - name: Install Docker Engine
+      shell: |
+        install -m 0755 -d /etc/apt/keyrings
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        chmod a+r /etc/apt/keyrings/docker.gpg
+        echo \
+          "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+          $(. /etc/os-release && echo $VERSION_CODENAME) stable" | \
+          tee /etc/apt/sources.list.d/docker.list > /dev/null
+        apt-get update -y
+        apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      args:
+        creates: /usr/bin/docker
+
+    - name: Add user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    - name: Configure UFW firewall (optional)
+      when: enable_firewall | default(false)
+      block:
+        - name: Install ufw
+          apt:
+            name: ufw
+            state: present
+        - name: Allow OpenSSH
+          community.general.ufw:
+            rule: allow
+            name: OpenSSH
+        - name: Allow HTTP/HTTPS
+          community.general.ufw:
+            rule: allow
+            port: '{{ item }}'
+            proto: tcp
+          loop: [80, 443]
+        - name: Allow API/Web (LAN)
+          community.general.ufw:
+            rule: allow
+            port: '{{ item }}'
+            proto: tcp
+          loop: [3000, 8000]
+        - name: Enable UFW
+          community.general.ufw:
+            state: enabled
+            logging: 'on'
+
+    - name: Create repo directory
+      file:
+        path: "{{ repo_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Rsync repo to server
+      synchronize:
+        src: "{{ playbook_dir }}/.."
+        dest: "{{ repo_dir }}"
+        rsync_opts:
+          - "--exclude=.git"
+          - "--delete-after"
+
+    - name: Ensure env directory exists
+      file:
+        path: "{{ env_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Resolve Cloudflare Zone ID
+      import_tasks: tasks/cloudflare_zone.yml
+
+    - name: Load/manage secrets from Cloudflare KV
+      import_tasks: tasks/secrets.yml
+
+    - name: Render Terraform tfvars for Cloudflare
+      template:
+        src: templates/terraform.tfvars.j2
+        dest: "{{ repo_dir }}/infra/terraform/cloudflare/terraform.tfvars"
+        mode: '0640'
+      when: cloudflare_zone_id is defined
+
+    - name: Ensure Cloudflare Tunnel (credentials-file mode fallback)
+      import_tasks: tasks/cloudflare_tunnel.yml
+
+    - name: Render prod .env from template
+      template:
+        src: templates/prod.env.j2
+        dest: "{{ env_file }}"
+        mode: '0640'
+
+    - name: Build and start services
+      community.docker.docker_compose_v2:
+        project_src: "{{ compose_dir }}"
+        files:
+          - "{{ compose_file | default('docker-compose.prod.yml') }}"
+        state: present
+
+    - name: Install systemd unit for compose (optional)
+      when: enable_systemd_unit | default(false)
+      template:
+        src: templates/mcp-compose.service.j2
+        dest: /etc/systemd/system/mcp-compose.service
+        mode: '0644'
+
+    - name: Reload systemd and enable service
+      when: enable_systemd_unit | default(false)
+      shell: |
+        systemctl daemon-reload
+        systemctl enable mcp-compose.service
+      args:
+        warn: false
+
+    - name: Ensure log directory exists
+      file:
+        path: /var/log/mcp
+        state: directory
+        mode: '0755'
+
+    - name: Install logrotate configuration for MCP
+      copy:
+        src: templates/logrotate-mcp.j2
+        dest: /etc/logrotate.d/mcp
+        mode: '0644'
+
+    - name: Install validation service and timer (optional)
+      when: enable_validation_timer | default(false)
+      block:
+        - name: Place validation service
+          template:
+            src: templates/mcp-validate.service.j2
+            dest: /etc/systemd/system/mcp-validate.service
+            mode: '0644'
+        - name: Place validation timer
+          template:
+            src: templates/mcp-validate.timer.j2
+            dest: /etc/systemd/system/mcp-validate.timer
+            mode: '0644'
+        - name: Enable and start validation timer
+          shell: |
+            systemctl daemon-reload
+            systemctl enable --now mcp-validate.timer
+          args:
+            warn: false

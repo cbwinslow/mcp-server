@@ -1,0 +1,45 @@
+---
+- hosts: mcp
+  gather_facts: true
+  tasks:
+    - name: Check Docker installed
+      command: docker --version
+      register: docker_version
+      changed_when: false
+      failed_when: docker_version.rc != 0
+
+    - name: Verify Postgres port
+      wait_for:
+        host: "{{ (database_url | regex_search('@([^:/]+)'))[1] | default('127.0.0.1') }}"
+        port: 5432
+        timeout: 2
+      ignore_errors: true
+
+    - name: Verify Neo4j port
+      wait_for:
+        host: "{{ (neo4j_uri | regex_search('://([^:/]+)'))[1] | default('127.0.0.1') }}"
+        port: 7687
+        timeout: 2
+      ignore_errors: true
+
+    - name: Verify NebulaGraph port
+      wait_for:
+        host: "{{ (nebula_addr.split(':'))[0] | default('127.0.0.1') }}"
+        port: "{{ (nebula_addr.split(':'))[1] | default('9669') }}"
+        timeout: 2
+      ignore_errors: true
+
+    - name: Verify TerminusDB port
+      wait_for:
+        host: "{{ (terminusdb_endpoint | regex_search('://([^:/]+)'))[1] | default('127.0.0.1') }}"
+        port: 6363
+        timeout: 2
+      ignore_errors: true
+
+    - name: Verify LocalAI port
+      wait_for:
+        host: "{{ (localai_base_url | regex_search('://([^:/]+)'))[1] | default('127.0.0.1') }}"
+        port: 8080
+        timeout: 2
+      ignore_errors: true
+

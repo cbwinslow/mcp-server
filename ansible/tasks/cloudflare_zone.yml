@@ -1,0 +1,15 @@
+---
+- name: Lookup Cloudflare Zone ID for {{ domain_root }}
+  uri:
+    url: "https://api.cloudflare.com/client/v4/zones?name={{ domain_root }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ cloudflare_api_token }}"
+  register: zone_search
+  changed_when: false
+
+- name: Set zone id fact
+  when: zone_search.status == 200 and (zone_search.json.result | length) > 0
+  set_fact:
+    cloudflare_zone_id: "{{ zone_search.json.result[0].id }}"
+

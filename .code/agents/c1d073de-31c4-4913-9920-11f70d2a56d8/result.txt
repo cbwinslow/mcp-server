@@ -1,0 +1,889 @@
+I'll create a comprehensive implementation plan for your MCP Server + Knowledge Graph Platform. Let me start by examining the key files to understand the current architecture.
+
+Now that I've examined the codebase, I'll create a comprehensive implementation plan for your MCP Server + Knowledge Graph Platform. Let me start by organizing my thoughts with a todo list.
+
+Let me continue analyzing the architecture and planning the implementation. First, let me check for any additional configuration files that might be relevant.
+
+Now that I have a comprehensive understanding of the current system, let me create a detailed implementation plan. I'll start by marking the architecture planning task as complete and moving on to designing the data models.
+
+# MCP Server + Knowledge Graph Platform Implementation Plan
+
+## 1. Architecture & Components
+
+### Containerization Baseline
+- **Primary choice**: Docker Compose (for single Ubuntu host deployment)
+- **Future path**: k3s orchestration (for scaling)
+- **Rationale**: Docker Compose provides simple, production-ready deployment for single node with clear path to k3s
+
+### Services Architecture
+
+#### Core Services
+1. **Supabase (Postgres)**
+   - Full self-hosted Supabase stack:
+     - Postgres database with pgBouncer
+     - Supabase services (auth, storage, functions)
+     - Studio admin UI
+     - Kong API gateway (included with Supabase)
+
+2. **Neo4j**
+   - Community Edition (sufficient for initial requirements)
+   - Plugins: APOC, GDS (Graph Data Science)
+   - Optional: Bloom (if license available)
+
+3. **Kong API Gateway**
+   - Use Supabase's Kong instance primarily
+   - Add dedicated Kong if more complex routing needed
+
+4. **MCP Server (FastAPI)**
+   - Migrated to async SQLAlchemy with Postgres
+   - Alembic for migrations
+
+5. **Workers**
+   - Ingestion workers (crawler, extractor)
+   - Embeddings generation workers
+
+6. **LlamaIndex Services**
+   - Hybrid retrieval service
+   - Knowledge graph sync workers
+
+### "Need vs Don't Need" Assessment
+
+#### Essential Services (Need)
+- Postgres (Supabase) - Core data storage
+- Neo4j - Graph database for knowledge representation
+- Kong - API gateway for security and routing
+- FastAPI MCP Server - Core API
+- Workers - Processing pipeline
+- LlamaIndex - Hybrid retrieval and KG integration
+
+#### Optional Services (Don't Need Initially)
+- Bloom - Visualization (can use Neo4j Browser)
+- Vector DB (separate) - Use pgvector in Postgres
+- MinIO - Object storage (can use Supabase storage)
+- Enterprise Neo4j - Community edition sufficient for MVP
+
+## 2. Data Models
+
+### Postgres Schema (Supabase)
+
+```sql
+-- Repositories table (enhanced from current)
+CREATE TABLE repositories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    owner TEXT NOT NULL,
+    url TEXT NOT NULL UNIQUE,
+    description TEXT,
+    language TEXT,
+    stars INTEGER DEFAULT 0,
+    forks INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ,
+    updated_at TIMESTAMPTZ,
+    added_at TIMESTAMPTZ DEFAULT NOW(),
+    processed BOOLEAN DEFAULT FALSE,
+    crawled_at TIMESTAMPTZ,
+    extracted_at TIMESTAMPTZ,
+    embedded_at TIMESTAMPTZ,
+    metadata JSONB  -- Extended metadata storage
+);
+
+-- Crawler jobs table (enhanced)
+CREATE TABLE crawler_jobs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    job_id TEXT UNIQUE NOT NULL,
+    status TEXT DEFAULT 'pending',
+    target TEXT,
+    config JSONB,  -- JSON config
+    started_at TIMESTAMPTZ,
+    completed_at TIMESTAMPTZ,
+    repositories_found INTEGER DEFAULT 0,
+    error_message TEXT
+);
+
+-- Embeddings table (with pgvector)
+CREATE TABLE embeddings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    repository_id UUID REFERENCES repositories(id),
+    content_type TEXT,
+    content_path TEXT,
+    embedding_vector VECTOR(768),  -- Using pgvector
+    model_name TEXT,
+    generated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- System status table
+CREATE TABLE system_status (
+    component TEXT PRIMARY KEY,
+    status TEXT DEFAULT 'unknown',
+    last_updated TIMESTAMPTZ DEFAULT NOW(),
+    details JSONB  -- JSON details
+);
+
+-- Knowledge graph entities (for LlamaIndex sync)
+CREATE TABLE kg_entities (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    entity_type TEXT NOT NULL,
+    name TEXT NOT NULL,
+    properties JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Knowledge graph relationships
+CREATE TABLE kg_relationships (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    source_entity_id UUID REFERENCES kg_entities(id),
+    target_entity_id UUID REFERENCES kg_entities(id),
+    relationship_type TEXT NOT NULL,
+    properties JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indexes for performance
+CREATE INDEX idx_repositories_owner ON repositories(owner);
+CREATE INDEX idx_repositories_language ON repositories(language);
+CREATE INDEX idx_repositories_stars ON repositories(stars);
+CREATE INDEX idx_repositories_added_at ON repositories(added_at);
+CREATE INDEX idx_embeddings_repo_id ON embeddings(repository_id);
+CREATE INDEX idx_embeddings_content_type ON embeddings(content_type);
+CREATE INDEX idx_kg_entities_type ON kg_entities(entity_type);
+CREATE INDEX idx_kg_entities_name ON kg_entities(name);
+```
+
+### Neo4j Graph Schema
+
+```cypher
+// Nodes
+(:Repository {
+  id: UUID,
+  name: String,
+  owner: String,
+  url: String,
+  description: String,
+  language: String,
+  stars: Integer,
+  forks: Integer,
+  created_at: DateTime,
+  updated_at: DateTime
+})
+
+(:File {
+  id: UUID,
+  path: String,
+  language: String,
+  size: Integer,
+  content_hash: String
+})
+
+(:Symbol {
+  id: UUID,
+  name: String,
+  type: String,  // function, class, variable, etc.
+  signature: String,
+  docstring: String
+})
+
+(:Topic {
+  id: UUID,
+  name: String,
+  description: String
+})
+
+(:User {
+  id: UUID,
+  username: String,
+  email: String
+})
+
+// Relationships
+(:Repository)-[:CONTAINS]->(:File)
+(:File)-[:DEFINES]->(:Symbol)
+(:Symbol)-[:RELATED_TO]->(:Topic)
+(:User)-[:OWNS]->(:Repository)
+(:User)-[:CONTRIBUTES_TO]->(:Repository)
+(:Repository)-[:SIMILAR_TO]->(:Repository)
+(:Symbol)-[:REFERENCES]->(:Symbol)
+```
+
+Now let me continue with the LlamaIndex integration strategy.
+
+## 3. LlamaIndex Integration Strategy
+
+### Integration Architecture
+
+#### Hybrid Retrieval Approach
+1. **Postgres + pgvector** for structured data and initial filtering
+2. **Neo4j** for relationship-based queries and graph analytics
+3. **LlamaIndex** as orchestration layer for:
+   - Hybrid search (vector + keyword)
+   - Knowledge graph synchronization
+   - Query routing based on intent
+
+#### Key Integration Points
+
+1. **Data Ingestion Pipeline**
+   ```
+   GitHub Repo → Crawler → Extractor → LlamaIndex Processor → 
+   [Postgres (structured data + embeddings)] + [Neo4j (graph relationships)]
+   ```
+
+2. **Query Processing Pipeline**
+   ```
+   User Query → LlamaIndex Router → 
+   [Vector Search (pgvector)] OR [Graph Query (Neo4j)] OR [Hybrid] → 
+   Results Aggregator → Response
+   ```
+
+### pgvector vs Neo4j Tradeoffs
+
+#### pgvector (Postgres)
+**Pros:**
+- Integrated with existing data storage
+- ACID compliance
+- Familiar SQL interface
+- Good for initial filtering and structured queries
+- Easier backup/restore
+
+**Cons:**
+- Limited relationship querying
+- Less efficient for complex graph traversals
+- Scaling challenges with high-dimensional vectors
+
+#### Neo4j
+**Pros:**
+- Native graph capabilities
+- Efficient relationship traversal
+- Powerful graph algorithms (via GDS)
+- Semantic querying with Cypher
+- Better for knowledge representation
+
+**Cons:**
+- Separate system to maintain
+- Different query language (Cypher vs SQL)
+- More complex backup/restore
+
+#### Recommendation
+Use **both** with LlamaIndex as the orchestration layer:
+- pgvector for initial filtering and similarity search
+- Neo4j for relationship discovery and graph analytics
+- LlamaIndex to intelligently route queries and combine results
+
+### LlamaIndex Components
+
+1. **Indexing Service**
+   - Repository document processors
+   - Code element extractors
+   - Embedding generators
+   - Knowledge graph updaters
+
+2. **Query Engine**
+   - Intent classifier (vector vs graph vs hybrid)
+   - Query routers
+   - Result synthesizers
+
+3. **KG Sync Service**
+   - Periodic sync from Postgres to Neo4j
+   - Relationship discovery algorithms
+   - Entity resolution
+
+Now let me work on the deployment plan for Ubuntu 192.168.4.117.
+
+## 4. Deployment Plan for Ubuntu 192.168.4.117
+
+### Docker Compose Structure
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # Supabase services
+  supabase-db:
+    image: supabase/postgres:15.1.0.147
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  supabase-kong:
+    image: kong:2.8
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: supabase-db
+      KONG_PG_USER: ${POSTGRES_USER}
+      KONG_PG_PASSWORD: ${POSTGRES_PASSWORD}
+      KONG_PG_DATABASE: ${POSTGRES_DB}
+    ports:
+      - "8000:8000"
+      - "8443:8443"
+      - "8001:8001"
+      - "8444:8444"
+
+  supabase-auth:
+    image: supabase/gotrue:v2.142.0
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    environment:
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@supabase-db:5432/${POSTGRES_DB}
+      GOTRUE_JWT_SECRET: ${JWT_SECRET}
+      GOTRUE_JWT_EXP: 3600
+    ports:
+      - "9999:9999"
+
+  supabase-storage:
+    image: supabase/storage-api:v0.46.4
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    environment:
+      ANON_KEY: ${ANON_KEY}
+      SERVICE_KEY: ${SERVICE_KEY}
+      POSTGREST_URL: http://supabase-rest:3000
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@supabase-db:5432/${POSTGRES_DB}
+    ports:
+      - "5000:5000"
+
+  supabase-rest:
+    image: postgrest/postgrest:v12.0.1
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@supabase-db:5432/${POSTGRES_DB}
+      PGRST_DB_SCHEMA: public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "3000:3000"
+
+  supabase-studio:
+    image: supabase/studio:20240101-8eab420
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    environment:
+      STUDIO_PG_META_URL: http://supabase-meta:8080
+      DEFAULT_ORGANIZATION: ${STUDIO_ORGANIZATION}
+      DEFAULT_PROJECT: ${STUDIO_PROJECT}
+    ports:
+      - "54323:54323"
+
+  # Neo4j service
+  neo4j:
+    image: neo4j:5.12-community
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
+      NEO4J_PLUGINS: '["apoc", "graph-data-science"]'
+      NEO4J_db_tx_log_rotation_retention_policy: "100M size"
+      NEO4J_server_memory_pagecache_size: "1G"
+      NEO4J_server_memory_heap_initial__size: "1G"
+      NEO4J_server_memory_heap_max__size: "1G"
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - ./neo4j/conf:/var/lib/neo4j/conf
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:7474 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # MCP Server
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp-server
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@supabase-db:5432/${POSTGRES_DB}
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+      MCP_SERVER_PORT: 3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./logs:/app/logs
+
+  # Worker services
+  crawler-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    depends_on:
+      mcp-server:
+        condition: service_started
+    environment:
+      WORKER_TYPE: crawler
+      MCP_SERVER_URL: http://mcp-server:3000
+    volumes:
+      - ./logs:/app/logs
+
+  embedding-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    depends_on:
+      mcp-server:
+        condition: service_started
+    environment:
+      WORKER_TYPE: embedding
+      MCP_SERVER_URL: http://mcp-server:3000
+      EMBEDDING_MODEL: all-MiniLM-L6-v2
+    volumes:
+      - ./logs:/app/logs
+
+  # LlamaIndex service
+  llmaindex-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.llmaindex
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@supabase-db:5432/${POSTGRES_DB}
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+    volumes:
+      - ./logs:/app/logs
+    ports:
+      - "8001:8000"
+
+volumes:
+  db_data:
+  neo4j_data:
+  neo4j_logs:
+```
+
+### Environment Variables (.env)
+
+```env
+# Postgres
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=supersecretpassword
+POSTGRES_DB=mcp_server
+
+# JWT
+JWT_SECRET=supersecret-jwt-token-with-at-least-32-characters-long
+ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.anon.key
+SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.service.key
+
+# Neo4j
+NEO4J_PASSWORD=neo4jsecretpassword
+
+# Studio
+STUDIO_ORGANIZATION=default
+STUDIO_PROJECT=default
+```
+
+### Volumes and Ports
+
+#### Volumes:
+1. `db_data` - Persistent Postgres data
+2. `neo4j_data` - Persistent Neo4j data
+3. `neo4j_logs` - Neo4j logs
+4. `./logs` - Application logs (mounted to host)
+
+#### Ports:
+- `5432` - Postgres
+- `8000` - Kong Gateway (HTTP)
+- `8443` - Kong Gateway (HTTPS)
+- `3000` - MCP Server
+- `7474` - Neo4j Browser
+- `7687` - Neo4j Bolt
+- `54323` - Supabase Studio
+- `8001` - LlamaIndex Service
+
+Let me continue with security, networking, and observability strategies.
+
+## 5. Security, Networking, and Observability Strategies
+
+### Security Strategy
+
+#### Secrets Management
+1. **Primary**: Bitwarden Secrets Manager (as currently implemented)
+2. **Backup**: SOPS with AWS KMS for critical infrastructure secrets
+3. **Runtime**: Docker secrets for container-level secrets
+
+#### Authentication & Authorization
+1. **API Authentication**:
+   - JWT tokens via Supabase Auth
+   - Kong API key validation for service-to-service
+   - OAuth2 integration for external services
+
+2. **Database Security**:
+   - Role-based access control (Postgres roles)
+   - Connection pooling with pgBouncer
+   - Encrypted connections (TLS)
+
+3. **Network Security**:
+   - Internal service communication only (no direct external access to DB)
+   - Kong as sole entry point with rate limiting
+   - Firewall rules on Ubuntu host
+
+#### Code Security
+1. **Static Analysis**:
+   - Bandit for Python security scanning
+   - Semgrep for custom rule checking
+   - Dependabot for dependency vulnerability monitoring
+
+2. **Runtime Security**:
+   - Container image scanning with Trivy
+   - Runtime monitoring with Falco
+
+### Networking Strategy
+
+#### Internal Network
+- **Default network**: Docker default bridge network
+- **Service discovery**: Docker DNS (service names)
+- **Inter-service communication**: HTTP/gRPC with service mesh consideration for future
+
+#### External Access
+- **Kong Gateway** as single entry point:
+  - `/api/*` → MCP Server
+  - `/db/*` → Supabase REST
+  - `/graph/*` → Neo4j (if exposed)
+  - `/studio/*` → Supabase Studio
+  - `/llm/*` → LlamaIndex Service
+
+#### TLS Strategy
+1. **Internal**: Self-signed certificates with internal CA
+2. **External** (if needed): Let's Encrypt with DNS challenge
+3. **Implementation**: Kong handling TLS termination
+
+#### Network Policies
+1. **Ingress**:
+   - Only Kong ports exposed externally (80, 443, 8000, 8443)
+   - Rate limiting and IP whitelisting where appropriate
+
+2. **Egress**:
+   - Internet access only for crawler and external API calls
+   - Internal service communication restricted
+
+### Observability Strategy
+
+#### Logging
+1. **Centralized Logging**:
+   - Loki for log aggregation
+   - Promtail for log shipping
+   - Structured JSON logging from all services
+
+2. **Log Structure**:
+   ```json
+   {
+     "timestamp": "ISO8601",
+     "service": "mcp-server",
+     "level": "info",
+     "message": "Repository processed successfully",
+     "trace_id": "unique-trace-id",
+     "context": {
+       "repo_id": "uuid",
+       "duration_ms": 1250
+     }
+   }
+   ```
+
+#### Monitoring
+1. **Metrics**:
+   - Prometheus for metrics collection
+   - Node exporter for host metrics
+   - Custom application metrics (processing rates, error rates)
+
+2. **Health Checks**:
+   - Liveness probes for all services
+   - Readiness probes for critical services
+   - Custom health endpoints in MCP server
+
+#### Tracing
+1. **OpenTelemetry**:
+   - Distributed tracing across services
+   - Trace context propagation
+   - Integration with logging and metrics
+
+#### Alerting
+1. **Critical Alerts**:
+   - Service downtime
+   - High error rates
+   - Resource exhaustion
+
+2. **Warning Alerts**:
+   - Slow processing times
+   - Low disk space
+   - High memory usage
+
+#### Visualization
+1. **Grafana**:
+   - Dashboards for system health
+   - Custom dashboards per service
+   - Business metrics visualization
+
+Now let me develop the phased rollout plan with acceptance criteria.
+
+## 6. Phased Rollout Plan with Acceptance Criteria
+
+### Phase 1: Foundation Infrastructure (Weeks 1-2)
+
+#### Objectives:
+- Deploy core Supabase stack with Postgres
+- Set up Neo4j with plugins
+- Establish Kong API gateway
+- Implement basic security and networking
+
+#### Tasks:
+1. Configure Supabase docker-compose with Postgres, Kong, and Auth
+2. Set up Neo4j with APOC and GDS plugins
+3. Configure Kong as API gateway
+4. Implement basic network security (firewall rules)
+5. Set up secrets management with Bitwarden
+6. Establish monitoring foundation (Prometheus, Grafana, Loki)
+
+#### Acceptance Criteria:
+- [ ] All services start successfully with health checks passing
+- [ ] Postgres accepts connections and can execute queries
+- [ ] Neo4j is accessible with plugins loaded
+- [ ] Kong routes requests to appropriate services
+- [ ] Secrets are properly managed and rotated
+- [ ] Basic monitoring dashboards display service status
+- [ ] Network security policies are implemented
+
+#### Commands:
+```bash
+# Deploy Phase 1 services
+docker-compose -f docker-compose.phase1.yml up -d
+
+# Verify services
+docker-compose ps
+
+# Check health endpoints
+curl http://localhost:8000/health
+curl http://localhost:7474
+```
+
+### Phase 2: Data Layer Migration (Weeks 3-4)
+
+#### Objectives:
+- Migrate from SQLite to Postgres
+- Implement data models and migrations
+- Set up pgvector extension
+- Validate data integrity
+
+#### Tasks:
+1. Update MCP server to use async SQLAlchemy with Postgres
+2. Create Alembic migrations for schema
+3. Implement pgvector extension for embeddings
+4. Migrate existing SQLite data to Postgres
+5. Update CrewAI tools to work with new endpoints
+6. Implement data validation and integrity checks
+
+#### Acceptance Criteria:
+- [ ] MCP server connects to Postgres successfully
+- [ ] All database tables are created with correct schema
+- [ ] pgvector extension is installed and functional
+- [ ] Existing data is migrated without loss
+- [ ] CrewAI tools can query the new database
+- [ ] Performance meets baseline requirements (queries < 100ms)
+- [ ] Data integrity checks pass
+
+#### Commands:
+```bash
+# Run database migrations
+alembic upgrade head
+
+# Verify schema
+docker-compose exec supabase-db psql -U postgres -d mcp_server -c "\dt"
+
+# Check pgvector installation
+docker-compose exec supabase-db psql -U postgres -d mcp_server -c "SELECT * FROM pg_extension;"
+```
+
+### Phase 3: Knowledge Graph Integration (Weeks 5-6)
+
+#### Objectives:
+- Integrate Neo4j for knowledge graph
+- Implement graph data models
+- Create synchronization between Postgres and Neo4j
+- Validate graph queries
+
+#### Tasks:
+1. Implement Neo4j client in MCP server
+2. Create graph schema and indices
+3. Develop sync service from Postgres to Neo4j
+4. Implement graph query endpoints
+5. Update CrewAI tools for graph operations
+6. Test graph traversal performance
+
+#### Acceptance Criteria:
+- [ ] MCP server can connect to Neo4j
+- [ ] Graph schema is implemented with proper indices
+- [ ] Data sync service operates correctly
+- [ ] Graph queries execute within performance thresholds
+- [ ] CrewAI tools can perform graph operations
+- [ ] Relationship discovery algorithms work as expected
+- [ ] Backup/restore procedures for Neo4j are validated
+
+#### Commands:
+```bash
+# Verify Neo4j connectivity
+docker-compose exec neo4j cypher-shell -u neo4j -p $NEO4J_PASSWORD "MATCH (n) RETURN count(n);"
+
+# Check plugin installation
+docker-compose exec neo4j cypher-shell -u neo4j -p $NEO4J_PASSWORD "CALL apoc.help('apoc') YIELD name RETURN count(name);"
+```
+
+### Phase 4: LlamaIndex and Hybrid Retrieval (Weeks 7-8)
+
+#### Objectives:
+- Integrate LlamaIndex for hybrid retrieval
+- Implement intelligent query routing
+- Set up knowledge graph synchronization
+- Validate retrieval performance
+
+#### Tasks:
+1. Deploy LlamaIndex service with required dependencies
+2. Implement query routing logic (vector vs graph vs hybrid)
+3. Create knowledge graph sync from LlamaIndex to Neo4j
+4. Optimize embedding generation and storage
+5. Implement caching for frequent queries
+6. Test retrieval accuracy and performance
+
+#### Acceptance Criteria:
+- [ ] LlamaIndex service deploys and starts successfully
+- [ ] Query routing correctly identifies query type
+- [ ] Hybrid retrieval combines results effectively
+- [ ] Knowledge graph sync maintains consistency
+- [ ] Retrieval performance meets SLA (queries < 500ms)
+- [ ] Accuracy benchmarks are established and met
+- [ ] Caching improves response times by >50%
+
+#### Commands:
+```bash
+# Test LlamaIndex service
+curl -X POST http://localhost:8001/query -H "Content-Type: application/json" -d '{"query": "find similar repositories"}'
+
+# Check retrieval metrics
+docker-compose exec llmaindex-service python -c "import retrieval_metrics; print(retrieval_metrics.get_accuracy())"
+```
+
+### Phase 5: Production Hardening (Weeks 9-10)
+
+#### Objectives:
+- Implement full security posture
+- Optimize performance and scalability
+- Establish backup and disaster recovery
+- Complete observability implementation
+
+#### Tasks:
+1. Implement comprehensive security scanning
+2. Set up automated backups for all data stores
+3. Configure high availability where needed
+4. Implement advanced monitoring and alerting
+5. Conduct load testing and optimization
+6. Document operational procedures
+7. Establish CI/CD pipeline
+
+#### Acceptance Criteria:
+- [ ] Security scans pass with no critical vulnerabilities
+- [ ] Automated backups run successfully and can be restored
+- [ ] High availability is configured for critical services
+- [ ] Monitoring and alerting cover all failure scenarios
+- [ ] Load testing shows system can handle 2x expected load
+- [ ] Operational documentation is complete and accurate
+- [ ] CI/CD pipeline deploys changes automatically and safely
+
+#### Commands:
+```bash
+# Run security scans
+trivy image mcp-server:latest
+bandit -r src/
+
+# Test backup/restore
+docker-compose exec supabase-db pg_dump -U postgres mcp_server > backup.sql
+# Restore test would be done in separate environment
+
+# Run load tests
+locust -f tests/load_test.py --headless -u 100 -r 10 --run-time 5m
+```
+
+## 7. Risks and Mitigations
+
+### Technical Risks
+
+1. **Data Migration Complexity**
+   - Risk: Data loss or corruption during SQLite to Postgres migration
+   - Mitigation: Comprehensive backup, validation scripts, and rollback plan
+
+2. **Performance Bottlenecks**
+   - Risk: Neo4j or Postgres becoming bottlenecks at scale
+   - Mitigation: Load testing, query optimization, and horizontal scaling plans
+
+3. **Integration Failures**
+   - Risk: LlamaIndex, Neo4j, and Postgres not working cohesively
+   - Mitigation: Thorough integration testing and staged rollouts
+
+### Operational Risks
+
+1. **Secrets Management**
+   - Risk: Exposure of sensitive credentials
+   - Mitigation: Use Bitwarden with proper access controls and audit logs
+
+2. **Backup Failures**
+   - Risk: Inability to recover from data loss
+   - Mitigation: Regular backup testing and multiple backup locations
+
+3. **Monitoring Gaps**
+   - Risk: System failures going undetected
+   - Mitigation: Comprehensive alerting and regular monitoring reviews
+
+## 8. Deployment Checklist for 192.168.4.117
+
+### Pre-deployment
+- [ ] Ubuntu 22.04 LTS installed and updated
+- [ ] Docker and Docker Compose installed
+- [ ] Firewall configured (ufw or iptables)
+- [ ] DNS resolution working
+- [ ] SSL certificates obtained (if needed)
+- [ ] Backup storage location configured
+- [ ] Monitoring system accessible
+
+### Deployment Steps
+1. Clone repository to `/opt/mcp-server`
+2. Configure `.env` file with secrets
+3. Create required directories and set permissions
+4. Deploy Phase 1 services
+5. Verify infrastructure components
+6. Proceed with subsequent phases
+
+### Post-deployment
+- [ ] Verify all services are running
+- [ ] Test critical user flows
+- [ ] Configure monitoring alerts
+- [ ] Document deployment in runbook
+- [ ] Train operations team
+
+This comprehensive plan provides a clear roadmap for implementing the MCP Server + Knowledge Graph Platform with a production-ready architecture that can scale from a single Ubuntu host to a k3s cluster when needed.

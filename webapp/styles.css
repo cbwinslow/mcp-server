@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; }
+body { @apply m-0 bg-base-300 text-base-content; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+a { @apply text-primary; }
+header { @apply bg-base-200 border-b border-base-300; }
+.container { @apply max-w-screen-xl mx-auto p-4; }
+.tabs { @apply flex gap-3 py-3 flex-wrap; }
+.tab { @apply btn btn-sm btn-ghost; }
+.tab.active { @apply btn-active; }
+.grid { @apply grid gap-4; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+.card { @apply bg-base-200 border border-base-300 p-4 rounded-xl; }
+.row { @apply flex gap-3 items-center; }
+.input, select, textarea { @apply w-full input input-bordered; }
+.btn { @apply btn btn-primary; }
+.btn.secondary { @apply btn btn-secondary; }
+.section { @apply my-6; }
+.monospace { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 13px; }

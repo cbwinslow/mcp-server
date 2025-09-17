@@ -1,0 +1,97 @@
+environment:
+  required_vars:
+    - DATABASE_URL
+    - NEO4J_URI
+    - NEO4J_USER
+    - NEO4J_PASSWORD
+
+crewai_config:
+  process: hierarchical
+  memory: true
+  verbose: true
+
+agents:
+  - name: kg-architect
+    role: KG Architect
+    goal: Define and evolve the knowledge graph schema and policies.
+    backstory: Senior graph engineer who designs robust ontologies and constraints.
+    tools: ["neo4j_cypher"]
+    llm: gpt-4o-mini
+    allow_delegation: true
+    verbose: true
+
+  - name: entity-extractor
+    role: Entity Extractor
+    goal: Extract high-quality entities from input text and code.
+    backstory: NLP specialist with strong domain modeling skills.
+    tools: ["github_repo_search", "python_ast_to_kg"]
+    llm: gpt-4o-mini
+    allow_delegation: true
+    verbose: true
+
+  - name: relation-extractor
+    role: Relation Extractor
+    goal: Infer relations between entities and propose typed edges.
+    backstory: Information extraction expert who loves graphs.
+    tools: []
+    llm: gpt-4o-mini
+    allow_delegation: true
+    verbose: true
+
+  - name: graph-syncer
+    role: Graph Syncer
+    goal: Upsert entities and relations into Neo4j using the approved schema.
+    backstory: ETL engineer versed in Cypher and graph stores.
+    tools: ["kg_sync", "neo4j_cypher", "graphiti_episodes"]
+    llm: gpt-4o-mini
+    allow_delegation: true
+    verbose: true
+
+  - name: graph-auditor
+    role: Graph Auditor
+    goal: Validate graph integrity and run quality checks and metrics.
+    backstory: QA engineer for knowledge graphs.
+    tools: ["neo4j_cypher"]
+    llm: gpt-4o-mini
+    allow_delegation: false
+    verbose: true
+
+tasks:
+  - name: define-schema
+    agent: kg-architect
+    description: |
+      Propose or update the KG schema. Create indexes/constraints in Neo4j as Cypher.
+      Labels: Repository, File, Chunk, Symbol, Topic, Entity; Rels: CONTAINS, DEFINES, REFERENCES, ABOUT, SIMILAR, MAPS_TO.
+    expected_output: Cypher statements to create constraints and indexes; schema justification.
+    context: []
+    async_execution: false
+
+  - name: extract-entities
+    agent: entity-extractor
+    description: |
+      From provided docs or code snippets (to be fed in context), extract entity candidates with stable IDs & properties.
+    expected_output: JSON list of nodes {label, properties{id, name, ...}}. Optionally include extracted edges.
+    context: []
+    async_execution: false
+
+  - name: extract-relations
+    agent: relation-extractor
+    description: |
+      From the same inputs and the entity list, infer relations with types and minimal properties.
+    expected_output: JSON list of edges {src:{label,id}, dst:{label,id}, type, properties}. If the entity extractor already returned edges, this step may enrich or validate them.
+    context: []
+    async_execution: false
+
+  - name: sync-graph
+    agent: graph-syncer
+    description: Upsert entities and relations via the kg_sync tool; report counts and any conflicts.
+    expected_output: Counts of created/merged nodes and edges; error list if any.
+    context: []
+    async_execution: false
+
+  - name: audit-graph
+    agent: graph-auditor
+    description: Run integrity checks (dangling nodes, duplicates by id, missing properties) and basic metrics.
+    expected_output: A brief QA report and recommended fixes.
+    context: []
+    async_execution: false

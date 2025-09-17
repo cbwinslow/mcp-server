@@ -1,0 +1,49 @@
+version: '3.9'
+name: mcp-platform-staging
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile.api
+    image: mcp-api:staging
+    restart: unless-stopped
+    env_file:
+      - ../staging/.env
+    environment:
+      - UVICORN_WORKERS=2
+    ports:
+      - "8001:8000"
+    volumes:
+      - /var/log/mcp:/var/log/mcp:ro
+    networks: [internal]
+
+  web:
+    build:
+      context: ..
+      dockerfile: Dockerfile.web
+    image: mcp-web:staging
+    restart: unless-stopped
+    env_file:
+      - ../staging/.env
+    environment:
+      - NEXT_PUBLIC_API_BASE=${API_BASE_URL:-http://localhost:8001}
+    ports:
+      - "3001:3000"
+    depends_on:
+      - api
+    networks: [internal]
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: sh -lc 'if [ -n "$CLOUDFLARE_TUNNEL_TOKEN" ]; then cloudflared tunnel run; elif [ -f /etc/cloudflared/config.yml ]; then cloudflared --config /etc/cloudflared/config.yml tunnel run; else echo "No token or credentials provided" && sleep 3600; fi'
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    networks: [internal]
+    depends_on: [web, api]
+    volumes:
+      - ../staging/cloudflared:/etc/cloudflared:ro
+
+networks:
+  internal:
+    driver: bridge

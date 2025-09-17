@@ -15,6 +15,19 @@ import shutil
 from pathlib import Path
 
 from crewai_tools import BaseTool
+from .kg_tools import Neo4jCypherTool as _Neo4jCypherTool, LlamaIndexGraphSyncTool as _LlamaIndexGraphSyncTool
+from .code_kg_tools import PythonAstExtractorTool as _PythonAstExtractorTool
+from .graphiti_tools import GraphitiEpisodesTool as _GraphitiEpisodesTool
+from .graphiti_mcp_client import GraphitiMCPClientTool as _GraphitiMCPClientTool
+from .graphiti_mcp_jsonrpc import GraphitiMcpJsonRpcTool as _GraphitiMcpJsonRpcTool
+from .graphiti_wrapped_tools import (
+    GraphitiAddMemoryTool as _GraphitiAddMemoryTool,
+    GraphitiSearchNodesTool as _GraphitiSearchNodesTool,
+    GraphitiSearchFactsTool as _GraphitiSearchFactsTool,
+    GraphitiGetEpisodesTool as _GraphitiGetEpisodesTool,
+    GraphitiClearGraphTool as _GraphitiClearGraphTool,
+    CrawlToGraphitiEpisodesTool as _CrawlToGraphitiEpisodesTool,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -64,6 +77,28 @@ class MCPServerStatusTool(BaseTool):
         except requests.exceptions.RequestException as e:
             error_result = {"error": str(e), "status": "failed", "component": component}
             return json.dumps(error_result, indent=2)
+
+class MCPCrawl4AITool(BaseTool):
+    """Tool to call an external MCP-crawl4ai server for web crawling"""
+
+    name: str = "MCP Crawl4AI Web Crawler"
+    description: str = "Crawl a URL using an MCP-crawl4ai server; returns extracted content/links"
+
+    def _run(self, url: str, depth: int = 1, max_pages: int = 5, include_links: bool = False) -> str:
+        base_url = os.getenv("MCP_CRAWL4AI_URL", "http://127.0.0.1:3005")
+        session = requests.Session()
+        payload = {
+            "url": url,
+            "depth": depth,
+            "max_pages": max_pages,
+            "include_links": include_links,
+        }
+        try:
+            resp = session.post(f"{base_url}/crawl", json=payload, timeout=60)
+            resp.raise_for_status()
+            return json.dumps(resp.json(), indent=2)
+        except requests.exceptions.RequestException as e:
+            return json.dumps({"status": "failed", "error": str(e)}, indent=2)
 
 class MCPDatabaseQueryTool(BaseTool):
     """Tool to execute queries against MCP database"""
@@ -356,12 +391,46 @@ class CodeReviewTool(BaseTool):
             return json.dumps(summary, indent=2)
         except Exception as e:
             return json.dumps({"error": str(e), "status": "failed", "quality": quality_result, "security": security_result}, indent=2)
+
+
+class MCPApiCrawlTool(BaseTool):
+    """Call MCP API /crawl proxy to fetch content using the configured Crawl4AI server."""
+
+    name: str = "MCP API Crawl"
+    description: str = "POST to MCP API /crawl. Inputs: 'url' (str), 'depth' (int, default 1), 'max_pages' (int, default 3)."
+
+    def _run(self, url: str, depth: int = 1, max_pages: int = 3) -> str:
+        base = os.getenv("MCP_API_BASE", "http://127.0.0.1:8000").rstrip("/")
+        headers = {"Content-Type": "application/json"}
+        jwt = os.getenv("MCP_JWT")
+        if jwt:
+            headers["Authorization"] = f"Bearer {jwt}"
+        try:
+            r = requests.post(f"{base}/crawl", json={"url": url, "depth": depth, "max_pages": max_pages}, headers=headers, timeout=120)
+            r.raise_for_status()
+            return json.dumps(r.json(), indent=2)
+        except requests.RequestException as e:
+            return json.dumps({"status": "failed", "error": str(e)})
 TOOL_REGISTRY = {
     "mcp_server_status": MCPServerStatusTool,
     "mcp_database_query": MCPDatabaseQueryTool,
     "mcp_github_crawler": MCPGitHubCrawlerTool,
     "mcp_embeddings_generator": MCPEmbeddingsGeneratorTool,
     "github_repo_search": GitHubRepoSearchTool,
+    "mcp_crawl4ai": MCPCrawl4AITool,
+    "neo4j_cypher": _Neo4jCypherTool,
+    "kg_sync": _LlamaIndexGraphSyncTool,
+    "python_ast_to_kg": _PythonAstExtractorTool,
+    "graphiti_episodes": _GraphitiEpisodesTool,
+    "graphiti_mcp": _GraphitiMCPClientTool,
+    "graphiti_mcp_jsonrpc": _GraphitiMcpJsonRpcTool,
+    "graphiti_add_memory": _GraphitiAddMemoryTool,
+    "graphiti_search_nodes": _GraphitiSearchNodesTool,
+    "graphiti_search_facts": _GraphitiSearchFactsTool,
+    "graphiti_get_episodes": _GraphitiGetEpisodesTool,
+    "graphiti_clear_graph": _GraphitiClearGraphTool,
+    "mcp_api_crawl": MCPApiCrawlTool,
+    "crawl_to_graphiti": _CrawlToGraphitiEpisodesTool,
     "codacy_analyze": CodacyAnalyzeTool,
     "security_scan": SecurityScanTool,
     "code_review": CodeReviewTool,

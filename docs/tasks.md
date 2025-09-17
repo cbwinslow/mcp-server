@@ -1,27 +1,52 @@
-Project tasks — MCP ingest & repo harvesting
+# Master Task List (Rolling)
 
-High level:
+Status codes: [P0]=now, [P1]=next, [P2]=later; (Done) when complete.
 
-- [ ] Pin project to Python 3.10 (done: `.python-version`)
-- [ ] Use `uv` (Astra) as the dependency manager; document install & usage
-- [ ] Gather/populate GitHub projects: Continue, CodeGPT, Graphite, Ottoman Agents, LangChain, LangGraph, LangSmith, Langfuse, LocalAI/Ollama, Linear/Jira/Confluence connectors
-- [ ] Mirror or import permissively-licensed repos into `imports/` where appropriate
-- [ ] Scrape or use pigsty CLI to gather scripts into `tools/pigsty/`
-- [ ] Add knowledge-graph-capable projects and agent templates to `imports/agents/`
-- [ ] Add legal doc analysis tools and parsers to `imports/legal_tools/`
-- [ ] Add embeddings model utilities and adapters to `mcp_ingest/embeddings_adapters/`
-- [ ] Create a `deploy/` plan to run multiple MCP servers in Docker or Kubernetes
-- [ ] Setup Confluence/Jira/Linear integrations and push docs repo to each platform
-- [ ] Evaluate local AI runtimes: Ollama, LocalAI, etc., and add to `deploy/` with scripts
-- [ ] Create a small knowledge graph PoC using Neo4j or RDF store
+## Platform & Security
+- [P0] Admin route hardening with role claims (Done)
+- [P0] Rate-limits on admin endpoints (Done)
+- [P1] Sentry/OTel sampling env + docs
+- [P1] Prometheus `/metrics` counters (Done)
+- [P2] Audit log export (JSONL) and download from Admin
 
-Disk cleanup & backups
-- [ ] Run `cleanup/cleanup_desktop_and_kernels.sh` (dry-run) and review packages to remove
-- [ ] Use `tools/backup_rsync.sh` to snapshot large folders to external disk or network mount
-- [ ] Use `tools/git_repo_backup.py` to scan and push all local git repos to GitHub (dry-run then push)
+## Data & Graph
+- [P0] Files/Chunks SQLAlchemy models + Alembic (Done)
+- [P0] Migration v2: repos/files/chunks/embeddings, dry-run/stream (Done)
+- [P1] Migration v2: better progress (per-entity totals, progress bar) (Done)
+- [P1] TerminusDB schema init endpoint (Done)
+- [P2] Embedding→Chunk linkage strategy (await DB column or mapping)
 
+## Validation
+- [P0] Validator v2: count mismatches, null refs, summary (Done)
+- [P1] Admin viewer for validation results with filters and CSV/JSON export
+- [P2] Cross-backend diff (e.g., Neo4j vs TerminusDB) where applicable
 
-Immediate next actions:
-1. I will harvest top GitHub repos by topic and add them to `imports/` (or list them if license prevents mirroring).
-2. I will fetch pigsty scripts (via CLI if available) into `tools/pigsty/`.
-3. I will add a short `tools/README.md` describing steps to run uv/astra and bootstrap the project.
+## Console (Next.js)
+- [P0] Settings: KV load/save for URLs (Done)
+- [P0] Settings: connectivity badges + last tested stamps (Done)
+- [P1] Settings: per-backend inline badges + timestamps (Done)
+- [P1] Graph: templates, color legend, label filter, search/focus, PNG/JSON (Done)
+- [P1] Admin: migration v2 Run & Run Live, progress, Download Summary (Done)
+- [P2] Admin: compact/detailed stream toggle, audit log viewer
+
+## Infra/IaC
+- [P0] Ansible: CF KV secrets, env render, systemd, checks (Done)
+- [P1] Terraform/Pulumi: CF DNS + Tunnel + KV namespace, example tfvars (Done)
+- [P1] Staging stack (compose profile) (Done)
+- [P2] Nightly validation job (Ansible timer) (Done)
+
+## CI/CD
+- [P0] Ruff + mypy + pytest (enforced) (Done)
+- [P1] Playwright smoke (non-blocking) (Done)
+- [P2] Lint/type/test as required gates; artifact uploads for summaries (validation report artifact added)
+
+## Docs
+- [P0] CODE.md (map) (Done)
+- [P0] AGENTS.md (Done)
+- [P1] DEPLOYMENT.md expanded with Sentry/OTel, metrics scrape
+
+## Milestones
+- M1 (Complete): Security hardening, Secrets, Infra scaffolding
+- M2 (Complete): Settings/Graph/Admin UX core, migration v2 basics
+- M3 (In progress): Streaming progress, validation v2, metrics
+- M4 (Upcoming): Validation viewer, audit exports, staging rollout

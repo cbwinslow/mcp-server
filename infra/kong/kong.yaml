@@ -1,0 +1,45 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: mcp-api
+    url: http://mcp-api:8000
+    routes:
+      - name: mcp-api-root
+        paths:
+          - /
+        strip_path: false
+        preserve_host: false
+        protocols: [https, http]
+        methods: [GET]
+      - name: mcp-api-v1
+        paths: ["/api"]
+        strip_path: false
+        protocols: [https]
+    plugins:
+      - name: cors
+        config:
+          origins: ["*"]
+          methods: ["GET", "POST", "OPTIONS"]
+          headers: ["Authorization", "Content-Type"]
+          credentials: false
+
+  - name: grafana
+    url: http://grafana:3000
+    routes:
+      - name: grafana-ui
+        paths: ["/grafana"]
+        strip_path: true
+        protocols: [https]
+    plugins:
+      - name: key-auth
+        config:
+          key_names: ["x-api-key"]
+          hide_credentials: true
+
+# Add JWT/OIDC once Supabase auth issuer is ready; decK can sync updates.
+
+plugins: []
+
+consumers: []
+

@@ -1,0 +1,50 @@
+# Inventory group vars for host(s) in group `mcp`
+
+repo_dir: /opt/mcp-server
+compose_dir: "{{ repo_dir }}/infra/compose"
+compose_file: docker-compose.prod.yml
+env_dir: "{{ repo_dir }}/infra/prod"
+env_file: "{{ env_dir }}/.env"
+
+# Feature flags
+enable_cloudflared: true
+enable_firewall: false
+enable_systemd_unit: true
+tunnel_name: mcp-tunnel
+enable_validation_timer: true
+validation_timer_calendar: 'daily'
+
+# Network / domains (optional; for Cloudflare-managed DNS)
+domain_root: cloudcurio.cc
+web_hostname: mcp
+api_hostname: api
+
+# External services (reuse existing DBs/backends)
+database_url: "postgresql+asyncpg://postgres:password@127.0.0.1:5432/mcp"
+neo4j_uri: "bolt://127.0.0.1:7687"
+neo4j_user: neo4j
+neo4j_password: changeme
+nebula_addr: "127.0.0.1:9669"
+nebula_user: root
+nebula_password: nebula
+terminusdb_endpoint: "http://127.0.0.1:6363"
+terminusdb_db: mcp
+terminusdb_token: ""
+
+# API / Web URLs
+api_base_url: "https://api.cloudcurio.cc"
+web_base_url: "https://mcp.cloudcurio.cc"
+
+# Auth / Chat
+gotrue_jwt_secret: ""
+chat_model: localai/llama3
+localai_base_url: "http://127.0.0.1:8080"
+
+# Optional Cloudflare Tunnel token if not using Terraform-managed credentials
+cloudflare_tunnel_token: ""
+
+# Cloudflare API for secrets (KV)
+cloudflare_api_token: "gKob2mQisfZo4JlzOmNct1VR9IEK0rn2rTFM4hH0"
+cloudflare_account_id: "968ff4ee9f5e59bc6c72758269d6b9d6"
+cloudflare_kv_namespace_title: "mcp-secrets"
+cloudflare_kv_env_prefix: "prod"

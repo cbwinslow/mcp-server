@@ -1,0 +1,9 @@
+tunnel: {{ tunnel_id }}
+credentials-file: /etc/cloudflared/{{ tunnel_id }}.json
+ingress:
+  - hostname: {{ web_hostname }}.{{ domain_root }}
+    service: http://web:3000
+  - hostname: {{ api_hostname }}.{{ domain_root }}
+    service: http://api:8000
+  - service: http_status:404
+

@@ -1,0 +1,578 @@
+[2025-09-15T02:55:38] Code v0.2.148
+--------
+workdir: /home/cbwinslow/Documents/mcp-server
+model: gpt-5
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: medium
+reasoning summaries: auto
+--------
+[2025-09-15T02:55:38] User instructions:
+Context: Local repo providing an MCP FastAPI server with SQLite and a CrewAI agent suite. We will migrate to Postgres (Supabase) and integrate Neo4j + LlamaIndex for knowledge graph and hybrid retrieval. Kong will be the API gateway. Proxmox provides the host; final deployment targets a single Ubuntu VM at 192.168.4.117 using Docker Compose with a later path to k3s.
+
+Agent: You are one of four planning agents collaborating in parallel to propose a comprehensive, dependency-ordered implementation plan for the “MCP Server + Knowledge Graph Platform” project. Your plan must be pragmatic for a single Ubuntu host (192.168.4.117) inside a Proxmox environment, with room to scale later.
+
+Project summary
+- Goal: Operationalize an MCP (Model Context Protocol) ingestion/search stack, add a knowledge-graph pipeline, and stand up a production‑ish self-hosted platform with Supabase (Postgres + ancillary services), Neo4j (+ plugins), and Kong API gateway. Eventually integrate cbwinslow/llama_index.git (fork) for indexing/agents and connect helpful MCP servers for knowledge-graph enrichment.
+- Deployment target: Ubuntu server at 192.168.4.117 (on Proxmox). Proxmox also hosts “container home”; Kong will front internal services. Postgres should live on Proxmox or Supabase bundle; choose the cleanest option.
+- Key asks: what we need vs don’t need; most intelligent way to assemble; enumerate services, networking, security, observability, backup, IaC; phase the rollout; provide commands and acceptance criteria.
+
+Repo context (local): /home/cbwinslow/Documents/mcp-server
+High-level structure
+- src/
+  - mcp_ingest/: FastAPI MCP server and SQLite DB layer
+  - crewai/: CrewAI agent manager + custom tools (HTTP tools to call MCP server, GitHub search, code review)
+- scripts/: helper scripts (secrets, harvesting, backups)
+- docs/: scaffolding for project docs
+- tests/: unit/integration/e2e tests
+- pyproject.toml: Python dependencies and CLI entry points
+- docker-compose.yml: present but currently empty in root; also a second docker-compose.yml in root late-bound
+
+Two key files to skim
+- src/mcp_ingest/main.py: FastAPI app providing /status, /db/query, /crawler/control, /embeddings/generate; currently uses SQLite via db.py and simulates crawler/embeddings.
+- src/crewai/crewai_agent.py: CrewAI manager that loads YAML config, creates agents/tools, and can kickoff tasks; logs to logs/crewai_agent.log.
+
+Current stack assumptions
+- Python FastAPI service exists but uses SQLite; will need to migrate to Postgres (Supabase) and add async SQLAlchemy, migrations.
+- CrewAI tools call MCP server via HTTP; will keep working after base URL change.
+- We will add neo4j for graph storage/analytics and LlamaIndex for hybrid retrieval + KG.
+
+What to plan
+1) Architecture & components
+- Choose containerization baseline (Docker/Podman) and compose/Orchestration (docker compose on single host; option to move to k3s later).
+- Services: supabase/self-host, neo4j (community or enterprise?) + plugins (APOC, GDS; Bloom if license), kong gateway, mcp-server API (FastAPI), worker(s) for ingestion/embeddings, optional vector DB (pgvector in Supabase) vs use Postgres only.
+- Networking: Kon g as north‑south gateway → route to MCP, Supabase API (if exposed), and internal admin UIs behind auth; TLS issuance (internal CA or Let’s Encrypt via DNS challenge), private CIDR rules.
+- Data: Postgres roles/DBs, pgvector extension, migrations, backups (pg_dump + WAL archiving), Neo4j storage and backup policy, object storage (MinIO optional) for artifacts.
+- Security: secrets (Bitwarden in repo indicates prior use; or 1Password/SOPS). Network policies, JWTs (Kong), OAuth (Supabase), scanning (Bandit/Ruff present), SBOM/Supply chain checks.
+- Observability: Loki/Promtail + Grafana, OpenTelemetry traces for FastAPI, basic uptime checks.
+- CI/CD: GitHub Actions to lint/test/build images and push to registry; deploy via SSH runner on 192.168.4.117.
+
+2) Migration & integrations
+- Replace SQLite with Postgres (async SQLAlchemy + Alembic). Define schema for repositories, crawler jobs, embeddings, and add pgvector.
+- Add Neo4j client + write path to push entities/relations; choose schema (repos, files, symbols, topics, repo→file, file→symbol, symbol→topic; user-provided domain entities later). Enable APOC + GDS.
+- LlamaIndex integration for indexing code/docs and KG sync; decide where KG lives (Neo4j primary; Postgres for tabular; optional hybrid retrieval via LlamaIndex PGVector + Neo4jQueryEngine).
+- MCP servers helpful for KG: file, git, crawler, and a Neo4j/Graph MCP if available; otherwise add a Graph tool.
+
+3) Deployment on 192.168.4.117
+- Self-hosted Supabase full stack (Studio, Postgres + pgBouncer, Kong if we don’t reuse theirs), or run upstream compose with overrides. Ensure IP pinning and volumes.
+- Neo4j with plugins (APOC, GDS) and reasonable heap/pagecache; data dir volumes and backups.
+- Kong gateway in front (either Supabase’s Kong or a dedicated Kong) with decK config as code.
+- FastAPI mcp-server image/container; workers for ingestion/embeddings.
+
+4) Deliverables per phase
+- Infra compose files, .env templates, network diagram, database schemas & migrations, graph schema, step‑by‑step runbooks, acceptance criteria, rollback plan.
+
+Constraints & environment
+- Host: Ubuntu on Proxmox. Single node now, must scale later.
+- IP: 192.168.4.117. DNS may be internal only.
+- Time‑to‑value favored; lean on Docker Compose first, keep k8s/k3s path in mind.
+
+Please produce:
+- A dependency‑ordered, multi‑phase plan with concrete steps and commands (where helpful).
+- Clear call‑outs of “need vs don’t need” for each component.
+- Security, networking, observability, and backup strategies.
+- Data models (high‑level) for Postgres and graph model for Neo4j.
+- Integration plan for LlamaIndex + MCP tools, including pgvector vs Neo4j tradeoffs.
+- Rollout plan for 192.168.4.117 with compose files structure, volumes, and ports.
+- Risks/open questions and acceptance criteria per phase.
+
+
+Desired output: A full implementation plan with phases, architecture choices, commands and IaC structure, data/graph schemas, acceptance criteria, risks, and a clear deployment checklist for 192.168.4.117. Optimize for a smart, minimal first cut that is production‑ish and secure.
+
+Files to consider: src/mcp_ingest/main.py, src/crewai/crewai_agent.py
+
+[Running in read-only mode - no modifications allowed]
+
+[2025-09-15T02:55:48] thinking
+
+**Planning API Gateway and Infrastructure**
+
+I’m considering the integration of Kong as the API gateway with Supabase. The plan should be practical, using a single Ubuntu host at the specified IP. I need to outline the use of Docker Compose now and plan for future migration to k3s. It’s essential to provide clear commands and acceptance criteria, while distinguishing what’s necessary for this plan. I'll break it down into phases, noting prerequisites and baseline infrastructure requirements.
+**Deciding on API Gateway Setup**
+
+I’m thinking about their desire to use Kong as the API gateway for their services. Using Supabase's Kong might share configurations, so running a dedicated Kong for North-South traffic across all services seems better. Alternatively, I could explore running Supabase's stack with their official compose, which includes Kong, but starting with "Vanilla Postgres 15 + pgvector + PgBouncer" might be simpler. Their goal involves using Kong as the main gateway while provisioning networks for frontend, backend, and database in the Docker Compose project.
+**Planning the Service Architecture**
+
+I’m considering a service architecture that includes a dedicated Kong Gateway and a Supabase stack featuring Postgres, Studio, pgBouncer, Auth, Realtime, and Storage. I might integrate Neo4j with APOC and GDS in the future, along with LlamaIndex in app workers. For data layer migration, I’ll migrate from SQLite to Postgres and provide an initial Alembic revision. I’ll also containerize the FastAPI MCP server while keeping observability in mind, possibly integrating Prometheus or Grafana with Loki for container logs and OpenTelemetry for tracing.
+**Implementing Security and CI/CD Practices**
+
+I'm planning to include logging in Grafana and basic uptime checks. There's a mention of integrating OpenTelemetry traces for FastAPI, so I'll need to include the OTEL Collector or a direct exporter to Tempo. For security, I’ll consider secrets management using SOPS or a `.env` file with 1Password or Bitwarden. I need to implement TLS via Caddy/Traefik or Let's Encrypt, and ensure Kong handles TLS termination. For CI/CD, I'm thinking of using GitHub Actions connected to a self-hosted runner for Docker. Lastly, I'll set up regular backups using `pg_dump` and manage WAL archiving with S3 compatibility.
+**Crafting the Deployment Plan**
+
+I'm outlining a detailed deployment plan for the system. For Neo4j, I'll schedule regular `neo4j-admin dump` commands for backups using cron or `ofelia` in Docker Compose. I'll also establish a rollout plan, outlining needs versus unnecessary components. The data model will include tables for repositories, jobs, and embeddings, while the graph model will consist of node labels and relationships. I’ll focus on using efficient integration with tools like LlamaIndex and define a clear CI/CD process with GitHub Actions.
+
+Security measures will involve secrets management and TLS configurations, and I'll set up Docker commands and necessary infrastructure as code, including `.env` files, network diagrams, and deployment checklists.
+**Finalizing the Deployment Plan**
+
+I've decided to store vector embeddings in Postgres using pgvector to simplify things. For the "needs vs. don't need" assessment, I plan to size memory for Neo4j heap and pagecache appropriately. I’ll propose using `nip.io` for IP-based domains to make TLS setup with Let's Encrypt easier. It's also important to check if there's existing internal DNS. I’ll include commands for generating Alembic migrations and rework FastAPI to use async SQLAlchemy with `asyncpg`, ensuring tests pass. I'll note the relevant files that will be updated accordingly.
+[2025-09-15T02:56:37] codex
+**Deciding on API Gateway Setup**
+
+I’m thinking about their desire to use Kong as the API gateway for their services. Using Supabase's Kong might share configurations, so running a dedicated Kong for North-South traffic across all services seems better. Alternatively, I could explore running Supabase's stack with their official compose, which includes Kong, but starting with "Vanilla Postgres 15 + pgvector + PgBouncer" might be simpler. Their goal involves using Kong as the main gateway while provisioning networks for frontend, backend, and database in the Docker Compose project.
+[2025-09-15T02:56:37] codex
+**Planning the Service Architecture**
+
+I’m considering a service architecture that includes a dedicated Kong Gateway and a Supabase stack featuring Postgres, Studio, pgBouncer, Auth, Realtime, and Storage. I might integrate Neo4j with APOC and GDS in the future, along with LlamaIndex in app workers. For data layer migration, I’ll migrate from SQLite to Postgres and provide an initial Alembic revision. I’ll also containerize the FastAPI MCP server while keeping observability in mind, possibly integrating Prometheus or Grafana with Loki for container logs and OpenTelemetry for tracing.
+[2025-09-15T02:56:37] codex
+**Implementing Security and CI/CD Practices**
+
+I'm planning to include logging in Grafana and basic uptime checks. There's a mention of integrating OpenTelemetry traces for FastAPI, so I'll need to include the OTEL Collector or a direct exporter to Tempo. For security, I’ll consider secrets management using SOPS or a `.env` file with 1Password or Bitwarden. I need to implement TLS via Caddy/Traefik or Let's Encrypt, and ensure Kong handles TLS termination. For CI/CD, I'm thinking of using GitHub Actions connected to a self-hosted runner for Docker. Lastly, I'll set up regular backups using `pg_dump` and manage WAL archiving with S3 compatibility.
+[2025-09-15T02:56:37] codex
+**Crafting the Deployment Plan**
+
+I'm outlining a detailed deployment plan for the system. For Neo4j, I'll schedule regular `neo4j-admin dump` commands for backups using cron or `ofelia` in Docker Compose. I'll also establish a rollout plan, outlining needs versus unnecessary components. The data model will include tables for repositories, jobs, and embeddings, while the graph model will consist of node labels and relationships. I’ll focus on using efficient integration with tools like LlamaIndex and define a clear CI/CD process with GitHub Actions.
+
+Security measures will involve secrets management and TLS configurations, and I'll set up Docker commands and necessary infrastructure as code, including `.env` files, network diagrams, and deployment checklists.
+[2025-09-15T02:56:37] codex
+**Finalizing the Deployment Plan**
+
+I've decided to store vector embeddings in Postgres using pgvector to simplify things. For the "needs vs. don't need" assessment, I plan to size memory for Neo4j heap and pagecache appropriately. I’ll propose using `nip.io` for IP-based domains to make TLS setup with Let's Encrypt easier. It's also important to check if there's existing internal DNS. I’ll include commands for generating Alembic migrations and rework FastAPI to use async SQLAlchemy with `asyncpg`, ensuring tests pass. I'll note the relevant files that will be updated accordingly.
+[2025-09-15T02:56:37] codex
+
+**Executive Summary**
+- Baseline: Single Ubuntu VM at 192.168.4.117, Docker Compose first, k3s path later.
+- Datastore: Self-host Supabase bundle for Postgres (+pgvector, Auth, Studio, pgBouncer). Use a dedicated external Kong as the north-south gateway. Keep Supabase’s internal Kong private.
+- Graph: Neo4j Community with APOC; GDS optional later. Store vectors in Postgres pgvector (primary). Add LlamaIndex for hybrid retrieval (PGVector + Neo4j query).
+- App: Containerize FastAPI MCP server + a worker for ingestion/crawling/embeddings. Migrate from SQLite to Postgres with async SQLAlchemy and Alembic.
+- Platform: Observability (Loki/Promtail + Grafana, optional Tempo + OTel Collector), backups, decK-managed Kong, CI/CD via GH Actions to GHCR and SSH deploy to the VM.
+
+---
+
+**Phased Plan (Dependency-Ordered)**
+
+1) Foundations: Host, Docker, Networks, Security
+- Need: Docker Engine + Compose, `ufw`/iptables, system user, basic hardening.
+- Don’t Need: Kubernetes, Traefik/Nginx (Kong will terminate TLS), Redis, Kafka.
+- Steps:
+  - Install Docker + Compose, add `coder`/deploy user to `docker` group, enable unattended upgrades.
+  - Create networks: `net_front` (public), `net_back` (internal), `net_db` (db-only).
+  - Open `ufw`: allow `22/tcp`, `80/tcp`, `443/tcp`; deny others; bind DB/Neo4j admin ports to localhost or LAN only.
+  - Prepare volumes dirs under `/srv/mcp/…` with correct ownership.
+- Commands:
+  - `sudo apt-get update && sudo apt-get install -y curl jq ufw ca-certificates`
+  - `curl -fsSL https://get.docker.com | sh`
+  - `sudo usermod -aG docker $USER && newgrp docker`
+  - `sudo ufw default deny incoming && sudo ufw default allow outgoing`
+  - `sudo ufw allow 22 && sudo ufw allow 80 && sudo ufw allow 443 && sudo ufw enable`
+- Acceptance:
+  - `docker version` and `docker compose version` succeed.
+  - Only 22/80/443 reachable from LAN.
+
+2) Core Data Platform: Supabase (Postgres + pgBouncer + Auth + Studio)
+- Need: Supabase self-host Compose (includes Postgres with pgvector).
+- Don’t Need: Separate vanilla Postgres, separate OAuth provider (use Supabase Auth).
+- Steps:
+  - Use upstream Supabase Compose with `.env` overrides.
+  - Keep Supabase’s Kong bound to internal network; only Studio optionally exposed to LAN (behind Kong/OAuth).
+  - Create DB, roles, enable `pgvector`.
+- Acceptance:
+  - `psql` connects internally via pgBouncer.
+  - `CREATE EXTENSION IF NOT EXISTS vector;` present.
+  - Supabase Studio reachable via Kong (or LAN) with auth.
+
+3) Graph Store: Neo4j + APOC (Community)
+- Need: Neo4j Community + APOC; vector indexing not required initially.
+- Don’t Need: Bloom, paid Enterprise, GDS initially.
+- Steps:
+  - Deploy `neo4j:5-community` with APOC plugin and tuned heap/pagecache.
+  - Bind Bolt to LAN only, HTTP UI either disabled or LAN+auth only.
+  - Create database `kg` (default) and set admin password via env or secrets.
+- Acceptance:
+  - `neo4j` container healthy; Bolt reachable from app network.
+  - `CALL apoc.version()` returns.
+
+4) Gateway & TLS: External Kong + decK
+- Need: Dedicated Kong for all public ingress, decK for declarative config, Let’s Encrypt or internal CA.
+- Don’t Need: Traefik/Nginx.
+- Steps:
+  - Deploy Kong + Postgres dbless or DB-backed (recommended DB-backed on same DB as Supabase? No: use Kong Postgres-internal if using Supabase internal; for external Kong run dbless with decK to avoid sharing DB).
+  - Use `nip.io` or internal DNS (e.g., `mcp.192-168-4-117.nip.io`) for certs.
+  - Configure routes/services for `mcp-api`, `supabase-studio` (optional), `grafana`, `neo4j-ui` (admin-only or disabled).
+  - Enable `jwt` and/or `oauth2` plugin; integrate with Supabase JWT verification for API routes.
+- Acceptance:
+  - `curl -I https://mcp.…/status` → 200 via Kong with TLS.
+  - decK `diff`/`sync` idempotent.
+
+5) App Migration: SQLite → Postgres (async) + Alembic
+- Need: async SQLAlchemy (`asyncpg`), Alembic migrations, pgvector.
+- Don’t Need: Sync SQLAlchemy, custom ORM.
+- Steps:
+  - Replace DB layer in `src/mcp_ingest/` with async engine, sessions, and Alembic migrations.
+  - Add `pgvector` type; add schema (repositories, files, chunks, embeddings, jobs).
+  - Update `src/crewai/crewai_agent.py` configs to use new endpoints/base URLs.
+  - Containerize app and a worker (`uvicorn` and Celery/RQ optional; or simple asyncio task runner).
+- Acceptance:
+  - `pytest` passes on unit/integration.
+  - `alembic upgrade head` runs cleanly.
+  - Endpoints `/status`, `/db/query`, `/crawler/control`, `/embeddings/generate` function against Postgres.
+
+6) LlamaIndex Integration: Hybrid Retrieval + KG Sync
+- Need: LlamaIndex for chunking/embeddings + PGVector retriever + Neo4j KG writer/query engine.
+- Don’t Need: Separate vector DB (we use pgvector).
+- Steps:
+  - Configure embedding model (e.g., OpenAI or local) and set embedding dim.
+  - Build index pipeline: Repo → Files → Chunks → Embeddings (Postgres) → Entities/Relations (Neo4j).
+  - Add LlamaIndex `PGVectorStore` and `Neo4jGraphStore`; implement periodic sync job.
+- Acceptance:
+  - Query returns hybrid results combining vector similarity (Postgres) and graph traversals (Neo4j).
+  - KG sync shows nodes/edges in Neo4j Browser; vector search returns top-k with <300ms on small corpus.
+
+7) Observability: Loki/Promtail + Grafana (+ optional Tempo + OTel Collector)
+- Need: Central logs (Loki), dashboards (Grafana), FastAPI traces (OTel).
+- Don’t Need: Full Prometheus stack initially.
+- Steps:
+  - Deploy Loki, Promtail scraping Docker logs; Grafana with pre-provisioned Loki datasource and dashboards.
+  - Add OpenTelemetry SDK + exporter in FastAPI to an OTel Collector (compose) and Grafana Tempo (optional).
+- Acceptance:
+  - Grafana reachable via Kong; dashboards show container logs and FastAPI latency/trace spans.
+
+8) Backups & DR
+- Need: Daily pg_dump + WAL archiving (wal-g) to object storage (optional MinIO); Neo4j backups.
+- Don’t Need: Complex cross-region replication now.
+- Steps:
+  - Configure `wal_level=replica`, archive with `wal-g` to MinIO or NAS; or start with `pg_dump --format=custom` nightly.
+  - Neo4j `neo4j-admin database dump` nightly with retention.
+  - Schedule via Ofelia (containerized cron) with healthchecks.
+- Acceptance:
+  - Simulated restore to test namespace works: Postgres restore <15m; Neo4j restore <10m.
+
+9) CI/CD
+- Need: GitHub Actions for lint/test/build/push; self-hosted runner or SSH deploy.
+- Don’t Need: Full GitOps/CD toolchain.
+- Steps:
+  - Build/push multi-arch images to GHCR.
+  - Deploy job SSHes to 192.168.4.117, pulls images, `docker compose up -d`.
+  - decK `sync` runs as part of deploy.
+- Acceptance:
+  - Commit to `main` triggers pipeline; updated container runs on the VM with zero downtime for API.
+
+---
+
+**What We Need vs Don’t Need (Per Component)**
+
+- Containerization:
+  - Need: Docker Compose profiles, named networks/volumes.
+  - Don’t Need: k8s/k3s right now.
+
+- Database:
+  - Need: Supabase bundle (Postgres 15/16, pgvector, pgBouncer).
+  - Don’t Need: Separate vector DB (use pgvector), logical replication now.
+
+- Graph:
+  - Need: Neo4j Community + APOC.
+  - Don’t Need: Bloom, Enterprise license; GDS initially.
+
+- Gateway:
+  - Need: External Kong (dbless with decK).
+  - Don’t Need: Traefik/Nginx.
+
+- App:
+  - Need: FastAPI MCP server, worker, async SQLAlchemy, Alembic.
+  - Don’t Need: Heavy queue stack; start with asyncio/background tasks.
+
+- Observability:
+  - Need: Loki/Promtail, Grafana, OTEL traces (Tempo optional).
+  - Don’t Need: Full Prometheus at start.
+
+- Secrets:
+  - Need: SOPS or `.env` with 1Password/Bitwarden workflow + Docker secrets.
+  - Don’t Need: Vault server initially.
+
+---
+
+**High-Level Data Model (Postgres + pgvector)**
+
+- `repositories`
+  - id (uuid, pk), name (text, unique), url (text), default_branch (text), created_at (timestamptz)
+- `files`
+  - id (uuid, pk), repo_id (fk), path (text), language (text), sha (text), size (int), updated_at (timestamptz)
+  - index: (repo_id, path), unique (repo_id, sha) partial by branch if needed
+- `chunks`
+  - id (uuid, pk), file_id (fk), chunk_index (int), text (text), tokens (int)
+  - index: (file_id, chunk_index)
+- `embeddings`
+  - id (uuid, pk), chunk_id (fk), embedding (vector[dim]), model (text), created_at
+  - index: ivfflat on `embedding` with `lists=100` (set per corpus size)
+- `crawler_jobs`
+  - id (uuid, pk), repo_id (fk), status (enum), started_at, finished_at, stats (jsonb)
+  - index: status, started_at
+- `tasks` (optional for CrewAI)
+  - id, type, payload (jsonb), status, created_at, updated_at
+- `entities` (optional tabular mirror for KG)
+  - id, type, properties (jsonb), source_ref (text)
+- `relationships` (optional mirror)
+  - id, src_entity_id, dst_entity_id, type, properties (jsonb)
+
+Notes:
+- Choose `embedding_dim`: 1536 (OpenAI) or 1024/768 based on provider; store as config.
+- Enable `pg_trgm` for fuzzy file/path search.
+- Add RLS later via Supabase policies if multi-tenant.
+
+---
+
+**Graph Model (Neo4j)**
+
+- Node Labels:
+  - Repository {id, name, url}
+  - File {id, path, language, sha}
+  - Chunk {id, index, text_hash, tokens}
+  - Symbol {name, kind, signature, file_path}
+  - Topic {name}
+  - Entity {type, properties} (generic domain)
+- Relationships:
+  - REPO_CONTAINS: (Repository) -[:CONTAINS]-> (File)
+  - FILE_CONTAINS: (File) -[:CONTAINS]-> (Chunk|Symbol)
+  - REFERENCES: (Symbol|File) -[:REFERENCES]-> (Symbol|File)
+  - SIMILAR: (Chunk) -[:SIMILAR {score}]-> (Chunk) [optional]
+  - ABOUT: (Chunk|Symbol) -[:ABOUT]-> (Topic)
+  - MAPS_TO: (Entity) -[:MAPS_TO]-> (Symbol|File|Chunk)
+- Indexes:
+  - `Repository(id)`, `File(id)`, `File(path)`, `Symbol(name)`, `Chunk(id)`
+- Retrieval:
+  - Vector search in Postgres → seed nodes; graph expansion via Cypher (k-hop along CONTAINS/REFERENCES/ABOUT).
+
+---
+
+**LlamaIndex + MCP Integration Plan**
+
+- LlamaIndex Components:
+  - Loader(s): Git/File MCP servers or internal tools read repositories/files.
+  - NodeParser: Code-aware splitting (function/class granularity) → `chunks`.
+  - Embeddings: Configurable model; write to `embeddings` (pgvector).
+  - VectorStore: `PGVectorStore` on `embeddings`.
+  - GraphStore: `Neo4jGraphStore` to materialize `Repository`, `File`, `Symbol`, `Topic`, edges.
+  - Query Engines:
+    - Hybrid: Top-k vector from PGVector; re-rank + KG hop via Cypher; combine results.
+    - Graph-RAG: Use Neo4j query to fetch context by structure (cross-repo refs).
+- MCP Tools:
+  - File + Git MCP for source ingestion.
+  - Crawler MCP for docs/web (already simulated; implement real).
+  - Graph Tool: Expose `/graph/upsert`, `/graph/query` endpoints to push/query KG (if no Neo4j MCP).
+- CrewAI:
+  - Use HTTP tools to orchestrate ingestion and query pipelines; log to `logs/crewai_agent.log`.
+
+---
+
+**Compose & IaC Layout**
+
+- `infra/compose/`
+  - `compose.core.yml` (Kong ext, Supabase stack, networks, volumes)
+  - `compose.graph.yml` (Neo4j)
+  - `compose.app.yml` (mcp-api, worker)
+  - `compose.obsv.yml` (loki, promtail, grafana, otelcol, tempo optional)
+  - `compose.backup.yml` (ofelia cron, wal-g/minio, neo4j dump)
+- `infra/kong/`
+  - `kong.yaml` (decK state), `certs/` or ACME config, `plugins/`
+- `infra/otel/otel-collector.yaml`
+- `infra/grafana/` (provisioning datasources/dashboards)
+- `infra/supabase/.env` (overrides, secrets), `infra/supabase/overrides.yml`
+- `infra/.env.example` (templates)
+- `migrations/` (Alembic)
+- `docs/` (network diagram, runbooks)
+- `scripts/` (bootstrap, backup/restore)
+
+Ports and Networks
+- Public via Kong: `80, 443`
+- Internal or LAN-only:
+  - Supabase Postgres: `5432` (net_db only)
+  - Supabase Studio: expose via Kong route with auth
+  - Neo4j: `7687` Bolt, `7474` HTTP (LAN or admin-only)
+  - Grafana: route via Kong with auth
+- Networks:
+  - `net_front`: Kong <-> clients
+  - `net_back`: Kong <-> app, studio, grafana
+  - `net_db`: app <-> Postgres, Kong-internal Supabase stack
+
+---
+
+**Example Compose Snippets (Abbreviated)**
+
+- Kong (dbless + decK)
+```yaml
+services:
+  kong:
+    image: kong:3.6
+    command: ["kong", "start", "-c", "/etc/kong/kong.conf"]
+    ports: ["80:8000", "443:8443"]
+    volumes:
+      - ./kong/kong.yaml:/kong/kong.yaml:ro
+      - ./kong/certs:/etc/kong/certs:ro
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: "/kong/kong.yaml"
+      KONG_SSL_CERT: /etc/kong/certs/fullchain.pem
+      KONG_SSL_CERT_KEY: /etc/kong/certs/privkey.pem
+    networks: [net_front, net_back]
+networks: { net_front: {}, net_back: {} }
+```
+
+- Neo4j
+```yaml
+services:
+  neo4j:
+    image: neo4j:5.20-community
+    ports: ["127.0.0.1:7474:7474", "127.0.0.1:7687:7687"]
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
+      NEO4J_dbms_memory_heap_initial__size: 2G
+      NEO4J_dbms_memory_heap_max__size: 2G
+      NEO4J_dbms_memory_pagecache_size: 2G
+      NEO4JLABS_PLUGINS: '["apoc"]'
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    networks: [net_back]
+volumes: { neo4j_data: {}, neo4j_logs: {} }
+```
+
+- MCP API and Worker
+```yaml
+services:
+  mcp-api:
+    build: ../  # or image: ghcr.io/you/mcp-api:main
+    command: uvicorn src.mcp_ingest.main:app --host 0.0.0.0 --port 8000
+    environment:
+      DATABASE_URL: postgresql+asyncpg://app:${DB_PASS}@supabase-db:5432/mcp
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+    depends_on: [supabase-db, neo4j]
+    networks: [net_back, net_db]
+
+  mcp-worker:
+    image: ghcr.io/you/mcp-worker:main
+    environment:
+      DATABASE_URL: postgresql+asyncpg://app:${DB_PASS}@supabase-db:5432/mcp
+      NEO4J_URI: bolt://neo4j:7687
+      ...
+    networks: [net_back, net_db]
+```
+
+- Loki/Promtail/Grafana (abbrev)
+```yaml
+services:
+  loki: { image: grafana/loki:2.9, command: -config.file=/etc/loki/config.yaml, ... }
+  promtail: { image: grafana/promtail:2.9, volumes: [/var/lib/docker/containers:/var/lib/docker/containers:ro], ... }
+  grafana: { image: grafana/grafana:10, ports: ["127.0.0.1:3000:3000"], ... }
+```
+
+---
+
+**Security & Networking**
+
+- TLS:
+  - Use Let’s Encrypt via DNS-01 if DNS available; otherwise internal CA + trust on clients; `nip.io` can be used for dev certs if HTTP-01 possible.
+- Auth:
+  - API: Verify Supabase JWTs in Kong (jwt plugin) or OAuth2 plugin with Supabase as issuer.
+  - Admin UIs (Studio, Grafana, Neo4j Browser): restrict via Kong IP ACLs + basic auth/OIDC, or LAN-only binding.
+- Secrets:
+  - Store in SOPS-encrypted `.env.sops` committed; decrypt on deploy. Or manage in 1Password/Bitwarden and render `.env` locally.
+  - Pass secrets via Docker secrets or env files not committed.
+- Network:
+  - Keep Postgres on `net_db` only; no public bind.
+  - Kong is the only service on `net_front` with public ports.
+  - Use `--icc=false` if tightening Docker intra-container comms later.
+
+---
+
+**Backups**
+
+- Postgres:
+  - Nightly `pg_dump -Fc mcp > /backups/mcp-$(date).dump` with 7–14 day retention.
+  - Upgrade to WAL archiving with `wal-g` to MinIO or NAS for PITR.
+- Neo4j:
+  - Nightly `neo4j-admin database dump neo4j --to-path=/backups/neo4j-$(date)`; rotate.
+- Config:
+  - Backup `infra/kong/kong.yaml`, Grafana provisioning, Compose files to Git (already).
+- Validation:
+  - Monthly restore test into disposable containers.
+
+---
+
+**CI/CD**
+
+- Lint/Test:
+  - `ruff`, `bandit`, `pytest`, type checks optional.
+- Build:
+  - `docker buildx bake` multi-arch; push to GHCR.
+- Deploy:
+  - Self-hosted runner on the VM or SSH action:
+    - `docker compose -f infra/compose/compose.core.yml pull && up -d`
+    - `docker compose -f infra/compose/compose.app.yml up -d --pull always`
+    - `deck sync -s infra/kong/kong.yaml`
+- Smoke:
+  - `curl https://mcp…/status` 200; run `pytest -m e2e` against staging endpoints.
+
+---
+
+**Migration Steps (SQLite → Postgres)**
+- Add async SQLAlchemy and Alembic to `pyproject.toml`; configure `env.py` for async engine.
+- Create base migration: repositories, files, chunks, embeddings (with `VECTOR(dim)`).
+- Implement async DB session dependency; replace SQLite code in `src/mcp_ingest/main.py`.
+- Update endpoints to write to new schema and call Neo4j client where appropriate.
+- Commands:
+  - `alembic init migrations`
+  - `alembic revision -m "baseline" --autogenerate`
+  - `alembic upgrade head`
+- Acceptance:
+  - All DB ops succeed against Postgres; embeddings insert and PGVector index query return expected results.
+
+---
+
+**Acceptance Criteria (Per Phase)**
+
+- Phase 1 (Foundations): Docker + Compose installed; only 22/80/443 open; named networks created.
+- Phase 2 (Supabase): Postgres ready with `vector` extension; Studio accessible with auth; pgBouncer in use.
+- Phase 3 (Neo4j): APOC available; secured access; data volumes persistent across restart.
+- Phase 4 (Kong): TLS on 443; routes to `mcp-api` and Studio working; decK sync idempotent.
+- Phase 5 (Migration): Tests green; Alembic migrations applied; API endpoints hit Postgres successfully.
+- Phase 6 (LlamaIndex): Ingest yields embeddings in Postgres; KG nodes/edges materialize in Neo4j; hybrid queries work.
+- Phase 7 (Observability): Logs visible in Grafana; 95th latency < target; traces present for key endpoints.
+- Phase 8 (Backups): Daily artifacts created; restore test passes.
+- Phase 9 (CI/CD): Push to main deploys new image; health checks pass via Kong.
+
+---
+
+**Risks & Open Questions**
+- DNS/TLS: Is public DNS available? If not, use internal CA or `nip.io`.
+- Resource sizing: Single VM memory for Neo4j heap/pagecache vs Postgres buffers; monitor OOM risk.
+- Supabase Kong collision: Ensure internal Supabase Kong not exposed; run external Kong dbless.
+- Embedding model & cost: Choose provider; handle API keys securely; consider local models later.
+- Vector dimension mismatch: Lock embedding dim early; migrations otherwise costly.
+- Future k3s: Keep compose services modular; later map to Helm charts.
+- Multi-tenancy: RLS and JWT claims mapping in Supabase if exposing to multiple users.
+
+---
+
+**Deployment Checklist (192.168.4.117)**
+- Host
+  - `apt upgrade`, install Docker/Compose, `ufw` configured.
+  - Create `/srv/mcp/{supabase,neo4j,kong,grafana,loki,backups}`.
+- Secrets
+  - Populate `infra/.env` from `.env.example` (DB passwords, JWT secrets, Neo4j password).
+  - Place TLS certs in `infra/kong/certs` or configure ACME.
+- Bring-up
+  - `docker compose -f infra/compose/compose.core.yml up -d` (Supabase + Kong)
+  - `docker compose -f infra/compose/compose.graph.yml up -d` (Neo4j)
+  - `docker compose -f infra/compose/compose.obsv.yml up -d` (Loki/Grafana)
+- Configure
+  - `deck diff -s infra/kong/kong.yaml` then `deck sync -s infra/kong/kong.yaml`
+  - `psql` → create DB `mcp`, user `app`, grant privs, enable `vector`.
+- App
+  - `alembic upgrade head`
+  - `docker compose -f infra/compose/compose.app.yml up -d`
+- Validate
+  - `curl -I https://mcp.<dns>/status` → 200
+  - Grafana shows logs; Neo4j APOC works; Studio access OK.
+
+---
+
+**Next Actions I Can Take**
+- Draft the `infra/compose/*.yml` files and `.env.example`.
+- Add Alembic + async SQLAlchemy skeleton and first migration.
+- Sketch `kong.yaml` decK config with routes/services/plugins.
+- Wire LlamaIndex PGVector + Neo4j stores and a minimal hybrid query path.
+
+Want me to scaffold the infra/compose files and Alembic migration in the repo, then hand you a ready-to-run branch?
+[2025-09-15T02:58:53] tokens used: 9830

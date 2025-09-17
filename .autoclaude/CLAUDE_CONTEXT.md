@@ -1,6 +1,6 @@
 # AutoClaude Project Context
 
-Generated at: 2025-09-14T13:47:04.058Z
+Generated at: 2025-09-15T03:13:44.849Z
 
 ---
 
@@ -9,20 +9,21 @@ Generated at: 2025-09-14T13:47:04.058Z
 ## Workspace
 - **Root**: /home/cbwinslow/Documents/mcp-server
 - **Type**: single
-- **Last Updated**: 2025-09-14T13:46:42.600Z
+- **Last Updated**: 2025-09-15T03:13:44.553Z
 
 ## Statistics
-- **Total Files**: 62
-- **Estimated Lines**: 1541
-- **Average File Size**: 26174 bytes
+- **Total Files**: 63
+- **Estimated Lines**: 304
+- **Average File Size**: 24232 bytes
 
 ## Languages
-- **python**: 7829 files
-- **json**: 4937 files
-- **markdown**: 4632 files
-- **shellscript**: 2427 files
-- **yaml**: 2353 files
-- **xml**: 137 files
+- **json**: 14121 files
+- **python**: 8583 files
+- **markdown**: 7166 files
+- **yaml**: 6787 files
+- **shellscript**: 4331 files
+- **xml**: 180 files
+- **sql**: 27 files
 
 ## Project Structure
 - **Main Languages**: Not detected
@@ -35,16 +36,16 @@ Generated at: 2025-09-14T13:47:04.058Z
 
 
 ## Largest Files
-- .codacy/tools-configs/semgrep.yaml (1411KB)
+- .codacy/tools-configs/semgrep.yaml (1401KB)
 - package-lock.json (58KB)
-- crewai_tools.py (14KB)
-- crewai_agent.py (11KB)
-- crewai_advanced_config.yaml (10KB)
-- .codacy/tools-configs/ruleset.xml (10KB)
-- .codacy/tools-configs/analysis_options.yaml (9KB)
-- README-crewai.md (8KB)
-- crewai_config.yaml (7KB)
-- demo_crewai_integration.py (6KB)
+- .autoclaude/scripts/test-check.sh (4KB)
+- .codacy/cli.sh (4KB)
+- .specstory/.what-is-this.md (3KB)
+- .autoclaude/config.json (3KB)
+- .autoclaude/enhanced-config.json (3KB)
+- pyproject.toml (2KB)
+- .autoclaude/CLAUDE_CONTEXT.md (2KB)
+- docs/DEPLOYMENT.md (2KB)
 
 
 ---
@@ -59,8 +60,8 @@ Generated at: 2025-09-14T13:47:04.058Z
 - **Failed**: 0
 
 ## Current Session
-- **Session ID**: mfjq5dls-bndgd5e
-- **Started**: 2025-09-14T13:22:03.424Z
+- **Session ID**: mfkjux2s-w5bv01p
+- **Started**: 2025-09-15T03:13:43.924Z
 - **Tasks in Session**: 0
 
 ## Recent Tasks
@@ -78,12 +79,33 @@ No unfinished tasks
 
 ### Git Status
 ```
-No changes detected
+ M .autoclaude/CLAUDE_CONTEXT.md
+ M .autoclaude/cache/project-index.json
+ M .autoclaude/tasks/sessions.json
+ M .codacy/codacy.yaml
+ m web-interface
+?? .claude_agent_farm_backups/settings_2025-09-15T01-13-58-724Z.json
+?? .claude_agent_farm_backups/settings_2025-09-15T01-17-39-010Z.json
+?? .claude_agent_farm_backups/settings_2025-09-15T01-21-25-134Z.json
+?? .claude_agent_farm_backups/settings_2025-09-15T01-25-04-779Z.json
+?? .claude_agent_farm_backups/settings_2025-09-15T01-28-08-769Z.json
+?? .claude_agent_farm_backups/settings_2025-09-15T01-35-00-631Z.json
+?? .code/
+?? docs/AI_STACK_CHOICES.md
+?? docs/DEPLOYMENT.md
+?? infra/
+?? migrations/
+
 ```
 
 ### Recent Commits
 ```
-No commits found
+24a7220 feat(mcp-server): implement core mcp ingest server with database and api
+4142a16 one last commit
+42a60e2 Update project structure and add new features
+7c91e59 asd;f
+02acdea Initial commit: Bitwarden Secrets Manager integration with comprehensive SDK and CLI support
+
 ```
 
 ---

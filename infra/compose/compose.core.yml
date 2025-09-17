@@ -1,0 +1,40 @@
+version: "3.9"
+
+# Core networks and shared, minimal always-on services (Kong gateway only here).
+# Other stacks are split into separate compose files: graph, app, obsv, db, ai.
+
+name: mcp
+
+networks:
+  net_front:
+    driver: bridge
+  net_back:
+    driver: bridge
+  net_db:
+    driver: bridge
+
+volumes:
+  kong_certs: {}
+
+services:
+  kong:
+    image: kong:3.6
+    container_name: kong
+    restart: unless-stopped
+    command: ["kong", "start", "-c", "/etc/kong/kong.conf"]
+    environment:
+      KONG_DATABASE: "off"             # dbless; config via decK YAML
+      KONG_DECLARATIVE_CONFIG: "/kong/kong.yaml"
+      KONG_LOG_LEVEL: info
+      # TLS can be terminated here; replace with your certs or use ACME in front proxy
+      # KONG_SSL_CERT and KONG_SSL_CERT_KEY can be mounted via kong_certs
+    ports:
+      - "80:8000"
+      - "443:8443"
+    volumes:
+      - ../kong/kong.yaml:/kong/kong.yaml:ro
+      - kong_certs:/etc/kong/certs
+    networks:
+      - net_front
+      - net_back
+

@@ -1,0 +1,13 @@
+---
+- hosts: mcp
+  become: false
+  tasks:
+    - name: Resolve Cloudflare Zone ID
+      import_tasks: tasks/cloudflare_zone.yml
+
+    - name: Render Terraform tfvars for Cloudflare
+      template:
+        src: templates/terraform.tfvars.j2
+        dest: "{{ repo_dir | default('/opt/mcp-server') }}/infra/terraform/cloudflare/terraform.tfvars"
+        mode: '0640'
+

@@ -1,0 +1,26 @@
+version: "3.9"
+
+# This file overrides the official Supabase compose to:
+# - Attach services to our shared networks
+# - Keep Supabase's Kong internal (no public host ports)
+
+networks:
+  net_back:
+    external: true
+  net_db:
+    external: true
+
+services:
+  # Example: attach Postgres and Studio to our networks
+  db:
+    networks:
+      - net_db
+  studio:
+    networks:
+      - net_back
+  kong:
+    # ensure kong from supabase is not binding host ports; let external kong handle ingress
+    ports: []
+    networks:
+      - net_back
+

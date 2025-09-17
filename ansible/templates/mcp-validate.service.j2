@@ -1,0 +1,13 @@
+[Unit]
+Description=MCP Nightly Validation
+After=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory={{ compose_dir }}
+ExecStart=/usr/bin/docker compose -f {{ compose_file | default('docker-compose.prod.yml') }} exec -T api python /app/scripts/server/run_validation.py >> /var/log/mcp/validation-$(date +%%F).json
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target
+

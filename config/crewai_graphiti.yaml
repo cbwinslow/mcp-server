@@ -1,0 +1,67 @@
+environment:
+  required_vars:
+    - GRAPHITI_MCP_SSE_URL
+    - NEO4J_URI
+    - NEO4J_USER
+    - NEO4J_PASSWORD
+    - TARGET_URL
+
+crewai_config:
+  process: sequential
+  memory: false
+  verbose: true
+
+agents:
+  - name: crawl-agent
+    role: Web Crawler
+    goal: Retrieve fresh docs for a target URL.
+    backstory: Web extraction specialist.
+    tools: ["mcp_api_crawl"]
+    llm: gpt-4o-mini
+    allow_delegation: true
+    verbose: true
+
+  - name: memory-agent
+    role: Memory Writer
+    goal: Convert crawled content into Graphiti episodes.
+    backstory: Transforms text into episodes for temporal KG.
+    tools: ["crawl_to_graphiti", "graphiti_add_memory"]
+    llm: gpt-4o-mini
+    allow_delegation: true
+    verbose: true
+
+  - name: graph-search-agent
+    role: Graph Search
+    goal: Search nodes and facts to confirm ingestion.
+    backstory: Finds relevant entities and relationships.
+    tools: ["graphiti_search_nodes", "graphiti_search_facts", "graphiti_get_episodes"]
+    llm: gpt-4o-mini
+    allow_delegation: false
+    verbose: true
+
+tasks:
+  - name: crawl-docs
+    agent: crawl-agent
+    description: |
+      Crawl the target URL (from env TARGET_URL) with depth 1 and max_pages 3 using mcp_api_crawl.
+      Pass the raw JSON result forward for episode writing.
+    expected_output: JSON payload of crawled items with content/text.
+    context: []
+    async_execution: false
+
+  - name: write-episodes
+    agent: memory-agent
+    description: |
+      Use crawl_to_graphiti to transform the previous crawl JSON into Graphiti episodes.
+      Use group_id from env GROUP_ID if set (default 'default').
+      Prefer batch_by_domain=true for large crawls to reduce episode count.
+    expected_output: Result summary with success counts.
+    context: []
+    async_execution: false
+
+  - name: verify-ingest
+    agent: graph-search-agent
+    description: Search for nodes/facts matching the target domain/topic; list latest episodes.
+    expected_output: Search results and episode list.
+    context: []
+    async_execution: false

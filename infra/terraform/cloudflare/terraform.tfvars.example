@@ -1,0 +1,8 @@
+api_token = "<cloudflare_api_token>"
+account_id = "968ff4ee9f5e59bc6c72758269d6b9d6"
+zone_id = "<detected_zone_id_for_cloudcurio.cc>"
+root_domain = "cloudcurio.cc"
+web_subdomain = "mcp"
+api_subdomain = "api"
+tunnel_name = "mcp-tunnel"
+

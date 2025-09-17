@@ -1,0 +1,110 @@
+---
+# Manage a named Cloudflare Tunnel via API and write credentials/config
+
+- name: Ensure tunnel name defined
+  set_fact:
+    tunnel_name: "{{ tunnel_name | default('mcp-tunnel') }}"
+
+- name: Read KV token, secret, and tunnel id if any
+  vars:
+    keys: ["CLOUDFLARE_TUNNEL_TOKEN", "CLOUDFLARE_TUNNEL_SECRET", "CLOUDFLARE_TUNNEL_ID"]
+  loop: "{{ keys }}"
+  loop_control:
+    loop_var: keyname
+  uri:
+    url: "https://api.cloudflare.com/client/v4/accounts/{{ cloudflare_account_id }}/storage/kv/namespaces/{{ kv_namespace_id }}/values/{{ (cloudflare_kv_env_prefix + ':' + keyname) | urlencode }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ cloudflare_api_token }}"
+  register: kv_token_vals
+  failed_when: false
+  changed_when: false
+
+- name: Aggregate KV tunnel vars
+  set_fact:
+    cf_tunnel_token: "{{ (kv_token_vals.results | selectattr('status','equalto',200) | map(attribute='content') | list | first) if (kv_token_vals.results | selectattr('invocation.module_args.url','search','CLOUDFLARE_TUNNEL_TOKEN') | list) else '' }}"
+    cf_tunnel_secret: "{{ (kv_token_vals.results | selectattr('invocation.module_args.url','search','CLOUDFLARE_TUNNEL_SECRET') | selectattr('status','equalto',200) | map(attribute='content') | list | first) | default('') }}"
+    cf_tunnel_id: "{{ (kv_token_vals.results | selectattr('invocation.module_args.url','search','CLOUDFLARE_TUNNEL_ID') | selectattr('status','equalto',200) | map(attribute='content') | list | first) | default('') }}"
+
+- name: Fetch tunnel by name
+  uri:
+    url: "https://api.cloudflare.com/client/v4/accounts/{{ cloudflare_account_id }}/cfd_tunnel?name={{ tunnel_name | urlencode }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ cloudflare_api_token }}"
+      Content-Type: application/json
+  register: tunnel_list
+  changed_when: false
+  failed_when: false
+
+- name: Set tunnel id if exists
+  when: tunnel_list.status == 200 and (tunnel_list.json.result | length) > 0
+  set_fact:
+    existing_tunnel_id: "{{ tunnel_list.json.result[0].id }}"
+
+- name: Generate secret if needed
+  when: cf_tunnel_secret | length == 0
+  set_fact:
+    cf_tunnel_secret: "{{ lookup('community.general.random_string', length=64, special=false) | b64encode }}"
+
+- name: Create tunnel if missing
+  when: existing_tunnel_id is not defined
+  uri:
+    url: "https://api.cloudflare.com/client/v4/accounts/{{ cloudflare_account_id }}/cfd_tunnel"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ cloudflare_api_token }}"
+      Content-Type: application/json
+    body_format: json
+    body:
+      name: "{{ tunnel_name }}"
+      secret: "{{ cf_tunnel_secret }}"
+  register: tunnel_create
+
+- name: Determine tunnel id
+  set_fact:
+    tunnel_id: "{{ (existing_tunnel_id | default('')) | ternary(existing_tunnel_id, tunnel_create.json.result.id) }}"
+
+- name: Persist tunnel id in KV
+  uri:
+    url: "https://api.cloudflare.com/client/v4/accounts/{{ cloudflare_account_id }}/storage/kv/namespaces/{{ kv_namespace_id }}/values/{{ (cloudflare_kv_env_prefix + ':CLOUDFLARE_TUNNEL_ID') | urlencode }}"
+    method: PUT
+    headers:
+      Authorization: "Bearer {{ cloudflare_api_token }}"
+      Content-Type: text/plain
+    body: "{{ tunnel_id }}"
+
+- name: Persist tunnel secret in KV (if we generated)
+  when: cf_tunnel_secret is defined
+  uri:
+    url: "https://api.cloudflare.com/client/v4/accounts/{{ cloudflare_account_id }}/storage/kv/namespaces/{{ kv_namespace_id }}/values/{{ (cloudflare_kv_env_prefix + ':CLOUDFLARE_TUNNEL_SECRET') | urlencode }}"
+    method: PUT
+    headers:
+      Authorization: "Bearer {{ cloudflare_api_token }}"
+      Content-Type: text/plain
+    body: "{{ cf_tunnel_secret }}"
+
+- name: Prepare cloudflared directory
+  file:
+    path: "{{ env_dir }}/cloudflared"
+    state: directory
+    mode: '0750'
+
+- name: Write credentials JSON for cloudflared
+  copy:
+    dest: "{{ env_dir }}/cloudflared/{{ tunnel_id }}.json"
+    mode: '0640'
+    content: |
+      {
+        "AccountTag": "{{ cloudflare_account_id }}",
+        "TunnelSecret": "{{ cf_tunnel_secret }}",
+        "TunnelID": "{{ tunnel_id }}",
+        "TunnelName": "{{ tunnel_name }}"
+      }
+
+- name: Render cloudflared config
+  template:
+    src: templates/cloudflared_config.yml.j2
+    dest: "{{ env_dir }}/cloudflared/config.yml"
+    mode: '0640'
+

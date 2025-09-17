@@ -1,0 +1,60 @@
+version: '3.9'
+name: mcp-platform
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile.api
+    image: mcp-api:prod
+    restart: unless-stopped
+    env_file:
+      - ../prod/.env
+    environment:
+      - UVICORN_WORKERS=2
+    ports:
+      - "8000:8000"
+    volumes:
+      - /var/log/mcp:/var/log/mcp:ro
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl -fsS http://localhost:8000/admin/index >/dev/null" ]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    depends_on: []
+    networks: [internal]
+
+  web:
+    build:
+      context: ..
+      dockerfile: Dockerfile.web
+    image: mcp-web:prod
+    restart: unless-stopped
+    env_file:
+      - ../prod/.env
+    environment:
+      - NEXT_PUBLIC_API_BASE=${API_BASE_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl -fsS http://localhost:3000 >/dev/null" ]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      - api
+    networks: [internal]
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: sh -lc 'if [ -n "$CLOUDFLARE_TUNNEL_TOKEN" ]; then cloudflared tunnel run; elif [ -f /etc/cloudflared/config.yml ]; then cloudflared --config /etc/cloudflared/config.yml tunnel run; else echo "No token or credentials provided" && sleep 3600; fi'
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    networks: [internal]
+    depends_on: [web, api]
+    volumes:
+      - ../prod/cloudflared:/etc/cloudflared:ro
+
+networks:
+  internal:
+    driver: bridge

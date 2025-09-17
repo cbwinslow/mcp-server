@@ -1,0 +1,117 @@
+{
+  "name": "Crawl → Index → KG Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyDay"
+            }
+          ]
+        }
+      },
+      "id": "Cron",
+      "name": "Cron",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        260,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.MCP_API_BASE || 'http://127.0.0.1:8000'}}/crawl",
+        "options": {},
+        "sendBody": true,
+        "jsonParameters": true,
+        "authentication": "none",
+        "headerParametersJson": "={{$env.MCP_JWT ? '{\"Authorization\": \"Bearer ' + $env.MCP_JWT + '\"}' : '{}'}}",
+        "bodyParametersJson": "={\"url\": $env.SEED_URL || 'https://fastapi.tiangolo.com/', \"depth\": 1, \"max_pages\": 3}"
+      },
+      "id": "HTTP Request",
+      "name": "Crawl",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        540,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.MCP_API_BASE || 'http://127.0.0.1:8000'}}/admin/index",
+        "options": {},
+        "sendBody": true,
+        "jsonParameters": true,
+        "authentication": "none",
+        "headerParametersJson": "={{$env.MCP_JWT ? '{\"Authorization\": \"Bearer ' + $env.MCP_JWT + '\"}' : '{}'}}",
+        "bodyParametersJson": "={{ JSON.stringify({ texts: [$json[\"content\"] || $json[\"text\"] || ''], collection: $env.COLLECTION || 'mcp_chunks' }) }}"
+      },
+      "id": "HTTP Request1",
+      "name": "Index",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        780,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.MCP_API_BASE || 'http://127.0.0.1:8000'}}/graph/query",
+        "options": {},
+        "sendBody": true,
+        "jsonParameters": true,
+        "authentication": "none",
+        "headerParametersJson": "={{$env.MCP_JWT ? '{\"Authorization\": \"Bearer ' + $env.MCP_JWT + '\"}' : '{}'}}",
+        "bodyParametersJson": "={\"query\": \"MATCH (n) RETURN count(n) as nodes\", \"mode\": \"read\"}"
+      },
+      "id": "HTTP Request2",
+      "name": "KG Check",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1020,
+        240
+      ]
+    }
+  ],
+  "connections": {
+    "Crawl": {
+      "main": [
+        [
+          {
+            "node": "Index",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron": {
+      "main": [
+        [
+          {
+            "node": "Crawl",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Index": {
+      "main": [
+        [
+          {
+            "node": "KG Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
+

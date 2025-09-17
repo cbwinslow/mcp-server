@@ -1,0 +1,9 @@
+tunnel: <tunnel-uuid>
+credentials-file: /root/.cloudflared/<tunnel-uuid>.json
+ingress:
+  - hostname: mcp.example.com
+    service: http://web:3000
+  - hostname: api.mcp.example.com
+    service: http://api:8000
+  - service: http_status:404
+

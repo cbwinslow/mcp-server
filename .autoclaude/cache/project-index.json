@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "createdAt": "2025-09-14T11:12:38.856Z",
-  "lastUpdated": "2025-09-14T13:48:12.623Z",
+  "lastUpdated": "2025-09-15T03:14:53.920Z",
   "workspaceRoot": "/home/cbwinslow/Documents/mcp-server",
   "files": [
     [
@@ -68,17 +68,6 @@
       }
     ],
     [
-      "cleanup/cleanup_desktop_and_kernels.sh",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/cleanup/cleanup_desktop_and_kernels.sh",
-        "relativePath": "cleanup/cleanup_desktop_and_kernels.sh",
-        "size": 1304,
-        "lastModified": "2025-09-12T04:15:12.487Z",
-        "hash": "043b916fb8a0fcd6557d7af7cda47a30",
-        "language": "shellscript"
-      }
-    ],
-    [
       "docker-compose.yml",
       {
         "path": "/home/cbwinslow/Documents/mcp-server/docker-compose.yml",
@@ -112,122 +101,13 @@
       }
     ],
     [
-      "mcp_ingest/README.md",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/mcp_ingest/README.md",
-        "relativePath": "mcp_ingest/README.md",
-        "size": 0,
-        "lastModified": "2025-09-12T04:15:36.445Z",
-        "hash": "d41d8cd98f00b204e9800998ecf8427e",
-        "language": "markdown"
-      }
-    ],
-    [
-      "mcp_ingest/__init__.py",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/mcp_ingest/__init__.py",
-        "relativePath": "mcp_ingest/__init__.py",
-        "size": 0,
-        "lastModified": "2025-09-12T04:15:36.031Z",
-        "hash": "d41d8cd98f00b204e9800998ecf8427e",
-        "language": "python"
-      }
-    ],
-    [
-      "mcp_ingest/crawler.py",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/mcp_ingest/crawler.py",
-        "relativePath": "mcp_ingest/crawler.py",
-        "size": 0,
-        "lastModified": "2025-09-12T04:15:36.127Z",
-        "hash": "d41d8cd98f00b204e9800998ecf8427e",
-        "language": "python"
-      }
-    ],
-    [
-      "mcp_ingest/db.py",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/mcp_ingest/db.py",
-        "relativePath": "mcp_ingest/db.py",
-        "size": 0,
-        "lastModified": "2025-09-12T04:15:36.167Z",
-        "hash": "d41d8cd98f00b204e9800998ecf8427e",
-        "language": "python"
-      }
-    ],
-    [
-      "mcp_ingest/embeddings.py",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/mcp_ingest/embeddings.py",
-        "relativePath": "mcp_ingest/embeddings.py",
-        "size": 0,
-        "lastModified": "2025-09-12T04:15:36.188Z",
-        "hash": "d41d8cd98f00b204e9800998ecf8427e",
-        "language": "python"
-      }
-    ],
-    [
-      "mcp_ingest/extractor.py",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/mcp_ingest/extractor.py",
-        "relativePath": "mcp_ingest/extractor.py",
-        "size": 0,
-        "lastModified": "2025-09-12T04:15:36.148Z",
-        "hash": "d41d8cd98f00b204e9800998ecf8427e",
-        "language": "python"
-      }
-    ],
-    [
-      "mcp_ingest/main.py",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/mcp_ingest/main.py",
-        "relativePath": "mcp_ingest/main.py",
-        "size": 0,
-        "lastModified": "2025-09-12T04:15:36.088Z",
-        "hash": "d41d8cd98f00b204e9800998ecf8427e",
-        "language": "python"
-      }
-    ],
-    [
-      "mcp_ingest/py.typed",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/mcp_ingest/py.typed",
-        "relativePath": "mcp_ingest/py.typed",
-        "size": 0,
-        "lastModified": "2025-09-12T04:15:35.950Z",
-        "hash": "d41d8cd98f00b204e9800998ecf8427e"
-      }
-    ],
-    [
-      "mcp_ingest/tasks.py",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/mcp_ingest/tasks.py",
-        "relativePath": "mcp_ingest/tasks.py",
-        "size": 0,
-        "lastModified": "2025-09-12T04:15:36.213Z",
-        "hash": "d41d8cd98f00b204e9800998ecf8427e",
-        "language": "python"
-      }
-    ],
-    [
       "pyproject.toml",
       {
         "path": "/home/cbwinslow/Documents/mcp-server/pyproject.toml",
         "relativePath": "pyproject.toml",
-        "size": 2273,
-        "lastModified": "2025-09-14T13:44:00.846Z",
-        "hash": "a95e333b4db80f9d58352d97bc553959"
-      }
-    ],
-    [
-      "tasks.md",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/tasks.md",
-        "relativePath": "tasks.md",
-        "size": 1726,
-        "lastModified": "2025-09-12T04:15:12.297Z",
-        "hash": "a0a54cb7320a6858ede42c3b7d67b7c5",
-        "language": "markdown"
+        "size": 2453,
+        "lastModified": "2025-09-14T16:06:41.120Z",
+        "hash": "d5c004943a5f9e61fbcc2fe5029e5a6b"
       }
     ],
     [
@@ -242,813 +122,13 @@
       }
     ],
     [
-      "tools/README.md",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/tools/README.md",
-        "relativePath": "tools/README.md",
-        "size": 0,
-        "lastModified": "2025-09-12T04:15:36.592Z",
-        "hash": "d41d8cd98f00b204e9800998ecf8427e",
-        "language": "markdown"
-      }
-    ],
-    [
-      "tools/USAGE.md",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/tools/USAGE.md",
-        "relativePath": "tools/USAGE.md",
-        "size": 0,
-        "lastModified": "2025-09-12T04:15:36.667Z",
-        "hash": "d41d8cd98f00b204e9800998ecf8427e",
-        "language": "markdown"
-      }
-    ],
-    [
-      "tools/backup_rsync.sh",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/tools/backup_rsync.sh",
-        "relativePath": "tools/backup_rsync.sh",
-        "size": 520,
-        "lastModified": "2025-09-12T04:15:12.662Z",
-        "hash": "e659b6f1233133bd60849278a6375140",
-        "language": "shellscript"
-      }
-    ],
-    [
-      "tools/fetch_cloudflare_secret.py",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/tools/fetch_cloudflare_secret.py",
-        "relativePath": "tools/fetch_cloudflare_secret.py",
-        "size": 0,
-        "lastModified": "2025-09-12T04:15:36.687Z",
-        "hash": "d41d8cd98f00b204e9800998ecf8427e",
-        "language": "python"
-      }
-    ],
-    [
-      "tools/fetch_pigsty.py",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/tools/fetch_pigsty.py",
-        "relativePath": "tools/fetch_pigsty.py",
-        "size": 0,
-        "lastModified": "2025-09-12T04:15:36.640Z",
-        "hash": "d41d8cd98f00b204e9800998ecf8427e",
-        "language": "python"
-      }
-    ],
-    [
-      "tools/git_repo_backup.py",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/tools/git_repo_backup.py",
-        "relativePath": "tools/git_repo_backup.py",
-        "size": 5212,
-        "lastModified": "2025-09-12T04:15:12.487Z",
-        "hash": "3a5c69a166ce352b8add5d45b350aba2",
-        "language": "python",
-        "symbols": [
-          {
-            "name": "find_git_repos",
-            "kind": 11,
-            "range": [
-              {
-                "line": 22,
-                "character": 0
-              },
-              {
-                "line": 30,
-                "character": 17
-              }
-            ],
-            "children": [
-              {
-                "name": "roots",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 22,
-                    "character": 19
-                  },
-                  {
-                    "line": 22,
-                    "character": 36
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "repos",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 23,
-                    "character": 4
-                  },
-                  {
-                    "line": 23,
-                    "character": 9
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "root",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 24,
-                    "character": 8
-                  },
-                  {
-                    "line": 24,
-                    "character": 12
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "p",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 25,
-                    "character": 12
-                  },
-                  {
-                    "line": 25,
-                    "character": 13
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "repo",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 26,
-                    "character": 12
-                  },
-                  {
-                    "line": 26,
-                    "character": 16
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "unique",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 29,
-                    "character": 4
-                  },
-                  {
-                    "line": 29,
-                    "character": 10
-                  }
-                ],
-                "children": []
-              }
-            ]
-          },
-          {
-            "name": "run",
-            "kind": 11,
-            "range": [
-              {
-                "line": 33,
-                "character": 0
-              },
-              {
-                "line": 38,
-                "character": 14
-              }
-            ],
-            "children": [
-              {
-                "name": "cmd",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 33,
-                    "character": 8
-                  },
-                  {
-                    "line": 33,
-                    "character": 11
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "cwd",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 33,
-                    "character": 13
-                  },
-                  {
-                    "line": 33,
-                    "character": 21
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "capture",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 33,
-                    "character": 23
-                  },
-                  {
-                    "line": 33,
-                    "character": 36
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "check",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 33,
-                    "character": 38
-                  },
-                  {
-                    "line": 33,
-                    "character": 49
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "res",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 35,
-                    "character": 4
-                  },
-                  {
-                    "line": 35,
-                    "character": 7
-                  }
-                ],
-                "children": []
-              }
-            ]
-          },
-          {
-            "name": "repo_status",
-            "kind": 11,
-            "range": [
-              {
-                "line": 41,
-                "character": 0
-              },
-              {
-                "line": 53,
-                "character": 94
-              }
-            ],
-            "children": [
-              {
-                "name": "repo",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 41,
-                    "character": 16
-                  },
-                  {
-                    "line": 41,
-                    "character": 26
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "r",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 43,
-                    "character": 8
-                  },
-                  {
-                    "line": 43,
-                    "character": 9
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "branch",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 44,
-                    "character": 8
-                  },
-                  {
-                    "line": 44,
-                    "character": 14
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "res",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 45,
-                    "character": 8
-                  },
-                  {
-                    "line": 45,
-                    "character": 11
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "dirty",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 46,
-                    "character": 8
-                  },
-                  {
-                    "line": 46,
-                    "character": 13
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "up",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 48,
-                    "character": 8
-                  },
-                  {
-                    "line": 48,
-                    "character": 10
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "has_upstream",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 49,
-                    "character": 8
-                  },
-                  {
-                    "line": 49,
-                    "character": 20
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "e",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 50,
-                    "character": 24
-                  },
-                  {
-                    "line": 50,
-                    "character": 25
-                  }
-                ],
-                "children": []
-              }
-            ]
-          },
-          {
-            "name": "push_repo",
-            "kind": 11,
-            "range": [
-              {
-                "line": 56,
-                "character": 0
-              },
-              {
-                "line": 89,
-                "character": 15
-              }
-            ],
-            "children": [
-              {
-                "name": "repo",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 56,
-                    "character": 14
-                  },
-                  {
-                    "line": 56,
-                    "character": 24
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "token",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 56,
-                    "character": 26
-                  },
-                  {
-                    "line": 56,
-                    "character": 43
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "info",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 57,
-                    "character": 4
-                  },
-                  {
-                    "line": 57,
-                    "character": 8
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "r",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 62,
-                    "character": 8
-                  },
-                  {
-                    "line": 62,
-                    "character": 9
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "status",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 63,
-                    "character": 8
-                  },
-                  {
-                    "line": 63,
-                    "character": 14
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "origin",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 70,
-                    "character": 8
-                  },
-                  {
-                    "line": 70,
-                    "character": 14
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "use_token",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 71,
-                    "character": 8
-                  },
-                  {
-                    "line": 71,
-                    "character": 17
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "secure",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 74,
-                    "character": 12
-                  },
-                  {
-                    "line": 74,
-                    "character": 18
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "p",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 77,
-                    "character": 8
-                  },
-                  {
-                    "line": 77,
-                    "character": 9
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "e",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 87,
-                    "character": 24
-                  },
-                  {
-                    "line": 87,
-                    "character": 25
-                  }
-                ],
-                "children": []
-              }
-            ]
-          },
-          {
-            "name": "main",
-            "kind": 11,
-            "range": [
-              {
-                "line": 92,
-                "character": 0
-              },
-              {
-                "line": 131,
-                "character": 24
-              }
-            ],
-            "children": [
-              {
-                "name": "p",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 93,
-                    "character": 4
-                  },
-                  {
-                    "line": 93,
-                    "character": 5
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "args",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 98,
-                    "character": 4
-                  },
-                  {
-                    "line": 98,
-                    "character": 8
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "roots",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 100,
-                    "character": 4
-                  },
-                  {
-                    "line": 100,
-                    "character": 9
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "repos",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 102,
-                    "character": 4
-                  },
-                  {
-                    "line": 102,
-                    "character": 9
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "report",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 105,
-                    "character": 4
-                  },
-                  {
-                    "line": 105,
-                    "character": 10
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "token",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 106,
-                    "character": 4
-                  },
-                  {
-                    "line": 106,
-                    "character": 9
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "ex",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 110,
-                    "character": 58
-                  },
-                  {
-                    "line": 110,
-                    "character": 60
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "futures",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 111,
-                    "character": 8
-                  },
-                  {
-                    "line": 111,
-                    "character": 15
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "f",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 112,
-                    "character": 12
-                  },
-                  {
-                    "line": 112,
-                    "character": 13
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "info",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 113,
-                    "character": 12
-                  },
-                  {
-                    "line": 113,
-                    "character": 16
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "r",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 117,
-                    "character": 8
-                  },
-                  {
-                    "line": 117,
-                    "character": 9
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "push_reports",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 124,
-                    "character": 8
-                  },
-                  {
-                    "line": 124,
-                    "character": 20
-                  }
-                ],
-                "children": []
-              },
-              {
-                "name": "res",
-                "kind": 12,
-                "range": [
-                  {
-                    "line": 128,
-                    "character": 16
-                  },
-                  {
-                    "line": 128,
-                    "character": 19
-                  }
-                ],
-                "children": []
-              }
-            ]
-          }
-        ]
-      }
-    ],
-    [
-      "tools/harvest_github.py",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/tools/harvest_github.py",
-        "relativePath": "tools/harvest_github.py",
-        "size": 0,
-        "lastModified": "2025-09-12T04:15:36.614Z",
-        "hash": "d41d8cd98f00b204e9800998ecf8427e",
-        "language": "python"
-      }
-    ],
-    [
-      "tools/harvest_github_anon.py",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/tools/harvest_github_anon.py",
-        "relativePath": "tools/harvest_github_anon.py",
-        "size": 0,
-        "lastModified": "2025-09-12T04:15:36.706Z",
-        "hash": "d41d8cd98f00b204e9800998ecf8427e",
-        "language": "python"
-      }
-    ],
-    [
       ".autoclaude/CLAUDE_CONTEXT.md",
       {
         "path": "/home/cbwinslow/Documents/mcp-server/.autoclaude/CLAUDE_CONTEXT.md",
         "relativePath": ".autoclaude/CLAUDE_CONTEXT.md",
-        "size": 1522,
-        "lastModified": "2025-09-14T13:47:04.057Z",
-        "hash": "5437c23b747232e05b18c6c7c12f582a",
+        "size": 2421,
+        "lastModified": "2025-09-15T03:13:44.848Z",
+        "hash": "e1087256de231075671c0d46ad6e8e08",
         "language": "markdown"
       }
     ],
@@ -1058,19 +138,8 @@
         "path": "/home/cbwinslow/Documents/mcp-server/.autoclaude/detected_problems.txt",
         "relativePath": ".autoclaude/detected_problems.txt",
         "size": 22,
-        "lastModified": "2025-09-14T13:22:11.358Z",
+        "lastModified": "2025-09-15T03:14:05.971Z",
         "hash": "f349cd4570e0ec5e3ff63fd895efb624"
-      }
-    ],
-    [
-      ".claude_agent_farm_backups/settings_2025-09-14T11-12-48-767Z.json",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/.claude_agent_farm_backups/settings_2025-09-14T11-12-48-767Z.json",
-        "relativePath": ".claude_agent_farm_backups/settings_2025-09-14T11-12-48-767Z.json",
-        "size": 2,
-        "lastModified": "2025-09-14T11:12:48.766Z",
-        "hash": "99914b932bd37a50b983c5e7c90ae93b",
-        "language": "json"
       }
     ],
     [
@@ -1078,9 +147,9 @@
       {
         "path": "/home/cbwinslow/Documents/mcp-server/.autoclaude/tasks/sessions.json",
         "relativePath": ".autoclaude/tasks/sessions.json",
-        "size": 410,
-        "lastModified": "2025-09-14T13:48:12.542Z",
-        "hash": "7ead4d8319bb3f25b2c837338d23108f",
+        "size": 1167,
+        "lastModified": "2025-09-15T03:14:48.624Z",
+        "hash": "a463f8573c87bcb918b4e8694ff07dcb",
         "language": "json"
       }
     ],
@@ -1090,7 +159,7 @@
         "path": "/home/cbwinslow/Documents/mcp-server/.autoclaude/tasks/tasks.json",
         "relativePath": ".autoclaude/tasks/tasks.json",
         "size": 2,
-        "lastModified": "2025-09-14T13:48:12.542Z",
+        "lastModified": "2025-09-15T03:14:48.624Z",
         "hash": "d751713988987e9331980363e24189ce",
         "language": "json"
       }
@@ -1134,7 +203,7 @@
         "path": "/home/cbwinslow/Documents/mcp-server/.autoclaude/config.json",
         "relativePath": ".autoclaude/config.json",
         "size": 3292,
-        "lastModified": "2025-09-14T13:22:03.613Z",
+        "lastModified": "2025-09-15T03:13:43.976Z",
         "hash": "7c852d4e074a92f52b6d1172d4fc3192",
         "language": "json"
       }
@@ -1184,17 +253,6 @@
       }
     ],
     [
-      "crewai_config.yaml",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/crewai_config.yaml",
-        "relativePath": "crewai_config.yaml",
-        "size": 7140,
-        "lastModified": "2025-09-14T13:44:00.844Z",
-        "hash": "631bb57c1321f63bbaced0018e2b29a4",
-        "language": "yaml"
-      }
-    ],
-    [
       ".codacy/cli.sh",
       {
         "path": "/home/cbwinslow/Documents/mcp-server/.codacy/cli.sh",
@@ -1210,9 +268,9 @@
       {
         "path": "/home/cbwinslow/Documents/mcp-server/.codacy/cli-config.yaml",
         "relativePath": ".codacy/cli-config.yaml",
-        "size": 11,
-        "lastModified": "2025-09-14T13:31:14.345Z",
-        "hash": "203ff582a9910dce987a7cf705ef71f9",
+        "size": 70,
+        "lastModified": "2025-09-15T01:14:11.190Z",
+        "hash": "dd26902400ba61ab45ccc3a3a0ec6a01",
         "language": "yaml"
       }
     ],
@@ -1221,128 +279,10 @@
       {
         "path": "/home/cbwinslow/Documents/mcp-server/.codacy/codacy.yaml",
         "relativePath": ".codacy/codacy.yaml",
-        "size": 269,
-        "lastModified": "2025-09-14T13:47:44.778Z",
-        "hash": "5dd6d2203e677c59f4a566a77c60b99e",
+        "size": 78,
+        "lastModified": "2025-09-15T03:14:46.306Z",
+        "hash": "e6d468775d2a1cf10a31c285894ab132",
         "language": "yaml"
-      }
-    ],
-    [
-      ".codacy/tools-configs/analysis_options.yaml",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/.codacy/tools-configs/analysis_options.yaml",
-        "relativePath": ".codacy/tools-configs/analysis_options.yaml",
-        "size": 9281,
-        "lastModified": "2025-09-14T13:31:15.881Z",
-        "hash": "36910684fda7b41b4891198f6301f08b",
-        "language": "yaml"
-      }
-    ],
-    [
-      ".codacy/tools-configs/lizard.yaml",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/.codacy/tools-configs/lizard.yaml",
-        "relativePath": ".codacy/tools-configs/lizard.yaml",
-        "size": 2357,
-        "lastModified": "2025-09-14T13:33:44.737Z",
-        "hash": "b72b693268f5a8ad276d9943f203da40",
-        "language": "yaml"
-      }
-    ],
-    [
-      ".codacy/tools-configs/ruleset.xml",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/.codacy/tools-configs/ruleset.xml",
-        "relativePath": ".codacy/tools-configs/ruleset.xml",
-        "size": 10106,
-        "lastModified": "2025-09-14T13:31:22.351Z",
-        "hash": "e9602d9bbe68aaa0f3690e7a9951c1d3",
-        "language": "xml"
-      }
-    ],
-    [
-      ".codacy/tools-configs/semgrep.yaml",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/.codacy/tools-configs/semgrep.yaml",
-        "relativePath": ".codacy/tools-configs/semgrep.yaml",
-        "size": 1444839,
-        "lastModified": "2025-09-14T13:33:44.019Z",
-        "hash": "fffb0e10e1a6a2c2c4d922e958ac906a",
-        "language": "yaml"
-      }
-    ],
-    [
-      ".codacy/tools-configs/pylint.rc",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/.codacy/tools-configs/pylint.rc",
-        "relativePath": ".codacy/tools-configs/pylint.rc",
-        "size": 665,
-        "lastModified": "2025-09-14T13:33:44.481Z",
-        "hash": "179cb09ef64cb8d6916e02c31d21d59d"
-      }
-    ],
-    [
-      ".codacy/tools-configs/trivy.yaml",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/.codacy/tools-configs/trivy.yaml",
-        "relativePath": ".codacy/tools-configs/trivy.yaml",
-        "size": 94,
-        "lastModified": "2025-09-14T13:33:40.768Z",
-        "hash": "874980c67e727321ebe7e1806daf29e8",
-        "language": "yaml"
-      }
-    ],
-    [
-      ".codacy/tools-configs/revive.toml",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/.codacy/tools-configs/revive.toml",
-        "relativePath": ".codacy/tools-configs/revive.toml",
-        "size": 1063,
-        "lastModified": "2025-09-14T13:31:20.466Z",
-        "hash": "2e8d53cff0462b55362e664765abd0fa"
-      }
-    ],
-    [
-      ".codacy/tools-configs/eslint.config.mjs",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/.codacy/tools-configs/eslint.config.mjs",
-        "relativePath": ".codacy/tools-configs/eslint.config.mjs",
-        "size": 3159,
-        "lastModified": "2025-09-14T13:31:21.690Z",
-        "hash": "9ce863a8c93fd2e77e2262b6bf4e4f18"
-      }
-    ],
-    [
-      ".codacy/tools-configs/languages-config.yaml",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/.codacy/tools-configs/languages-config.yaml",
-        "relativePath": ".codacy/tools-configs/languages-config.yaml",
-        "size": 2705,
-        "lastModified": "2025-09-14T13:33:40.495Z",
-        "hash": "5c2dd28b4e8fd34cd9befb0cfc8f0f3d",
-        "language": "yaml"
-      }
-    ],
-    [
-      "crewai_tools.py",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/crewai_tools.py",
-        "relativePath": "crewai_tools.py",
-        "size": 14500,
-        "lastModified": "2025-09-14T13:44:00.845Z",
-        "hash": "6e4794e093c3c5ed9c0bf7ba1e48791a",
-        "language": "python"
-      }
-    ],
-    [
-      "crewai_agent.py",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/crewai_agent.py",
-        "relativePath": "crewai_agent.py",
-        "size": 11417,
-        "lastModified": "2025-09-14T13:44:00.846Z",
-        "hash": "43db276e8b02f0be130fbde8d8b585ad",
-        "language": "python"
       }
     ],
     [
@@ -1356,36 +296,415 @@
       }
     ],
     [
-      "README-crewai.md",
+      ".ruff_cache/0.12.12/10491121894164473741",
       {
-        "path": "/home/cbwinslow/Documents/mcp-server/README-crewai.md",
-        "relativePath": "README-crewai.md",
-        "size": 8470,
-        "lastModified": "2025-09-14T13:44:00.854Z",
-        "hash": "1d3c5f3631456a5c8fe54825ffcade05",
-        "language": "markdown"
+        "path": "/home/cbwinslow/Documents/mcp-server/.ruff_cache/0.12.12/10491121894164473741",
+        "relativePath": ".ruff_cache/0.12.12/10491121894164473741",
+        "size": 82,
+        "lastModified": "2025-09-15T03:13:50.448Z",
+        "hash": "7cc8a3db093d2cae938f7915f1a55207"
       }
     ],
     [
-      "crewai_advanced_config.yaml",
+      ".ruff_cache/0.12.12/11339457690138618961",
       {
-        "path": "/home/cbwinslow/Documents/mcp-server/crewai_advanced_config.yaml",
-        "relativePath": "crewai_advanced_config.yaml",
-        "size": 10218,
-        "lastModified": "2025-09-14T13:44:00.854Z",
-        "hash": "8df617dc9c5e1fa9b851e5d0f1ecb346",
+        "path": "/home/cbwinslow/Documents/mcp-server/.ruff_cache/0.12.12/11339457690138618961",
+        "relativePath": ".ruff_cache/0.12.12/11339457690138618961",
+        "size": 266,
+        "lastModified": "2025-09-15T03:13:50.448Z",
+        "hash": "274729465365cb13023a5d25b3cedb5d"
+      }
+    ],
+    [
+      ".ruff_cache/0.12.12/15849873648043882155",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.ruff_cache/0.12.12/15849873648043882155",
+        "relativePath": ".ruff_cache/0.12.12/15849873648043882155",
+        "size": 145,
+        "lastModified": "2025-09-15T03:13:50.448Z",
+        "hash": "ede33a9504ff83c799e57d96fc0ba2ca"
+      }
+    ],
+    [
+      ".ruff_cache/0.12.12/3568689856608365237",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.ruff_cache/0.12.12/3568689856608365237",
+        "relativePath": ".ruff_cache/0.12.12/3568689856608365237",
+        "size": 109,
+        "lastModified": "2025-09-15T03:13:50.450Z",
+        "hash": "799060f17dbfdaaf0eeb399989d8939d"
+      }
+    ],
+    [
+      ".ruff_cache/0.12.12/4172315000541395229",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.ruff_cache/0.12.12/4172315000541395229",
+        "relativePath": ".ruff_cache/0.12.12/4172315000541395229",
+        "size": 175,
+        "lastModified": "2025-09-15T03:13:50.450Z",
+        "hash": "62f77046d3a46274a246cb7846e2109c"
+      }
+    ],
+    [
+      ".ruff_cache/0.12.12/4281160989998950099",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.ruff_cache/0.12.12/4281160989998950099",
+        "relativePath": ".ruff_cache/0.12.12/4281160989998950099",
+        "size": 93,
+        "lastModified": "2025-09-15T01:13:40.780Z",
+        "hash": "192cfa30409dc6db1aa551ffff3b165b"
+      }
+    ],
+    [
+      ".ruff_cache/0.12.12/481056029047474556",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.ruff_cache/0.12.12/481056029047474556",
+        "relativePath": ".ruff_cache/0.12.12/481056029047474556",
+        "size": 94,
+        "lastModified": "2025-09-15T03:13:50.450Z",
+        "hash": "e88b8f8b74819bee9607eb9e74021436"
+      }
+    ],
+    [
+      ".ruff_cache/0.12.12/5620546966722954692",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.ruff_cache/0.12.12/5620546966722954692",
+        "relativePath": ".ruff_cache/0.12.12/5620546966722954692",
+        "size": 96,
+        "lastModified": "2025-09-15T03:13:50.448Z",
+        "hash": "316c1e99b208fb185dd551d06369252a"
+      }
+    ],
+    [
+      ".ruff_cache/0.12.12/6672829891159979050",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.ruff_cache/0.12.12/6672829891159979050",
+        "relativePath": ".ruff_cache/0.12.12/6672829891159979050",
+        "size": 255,
+        "lastModified": "2025-09-15T01:13:40.779Z",
+        "hash": "95a549077435f49d8c4d879373f44bfa"
+      }
+    ],
+    [
+      ".ruff_cache/0.12.12/6717101820235008094",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.ruff_cache/0.12.12/6717101820235008094",
+        "relativePath": ".ruff_cache/0.12.12/6717101820235008094",
+        "size": 80,
+        "lastModified": "2025-09-15T03:13:50.450Z",
+        "hash": "43a30c933c3821cba8e8f6da1b2c2410"
+      }
+    ],
+    [
+      ".ruff_cache/0.12.12/7954255919701839955",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.ruff_cache/0.12.12/7954255919701839955",
+        "relativePath": ".ruff_cache/0.12.12/7954255919701839955",
+        "size": 148,
+        "lastModified": "2025-09-15T03:13:50.448Z",
+        "hash": "849cc921c2204e5619b478f811e918a2"
+      }
+    ],
+    [
+      ".ruff_cache/0.12.12/8095857746969180028",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.ruff_cache/0.12.12/8095857746969180028",
+        "relativePath": ".ruff_cache/0.12.12/8095857746969180028",
+        "size": 95,
+        "lastModified": "2025-09-15T03:13:50.448Z",
+        "hash": "743dc143eadf023b9b8deeb83c2b3395"
+      }
+    ],
+    [
+      ".ruff_cache/0.12.12/8174889514435221160",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.ruff_cache/0.12.12/8174889514435221160",
+        "relativePath": ".ruff_cache/0.12.12/8174889514435221160",
+        "size": 93,
+        "lastModified": "2025-09-15T01:13:40.780Z",
+        "hash": "f02a0232d321862b1019c26c96c6ae2a"
+      }
+    ],
+    [
+      ".ruff_cache/0.12.12/8258886408457913169",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.ruff_cache/0.12.12/8258886408457913169",
+        "relativePath": ".ruff_cache/0.12.12/8258886408457913169",
+        "size": 122,
+        "lastModified": "2025-09-15T03:13:50.448Z",
+        "hash": "e8df236a470b76b0f5c273a3b8b98f01"
+      }
+    ],
+    [
+      ".ruff_cache/0.12.12/8954908047683958114",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.ruff_cache/0.12.12/8954908047683958114",
+        "relativePath": ".ruff_cache/0.12.12/8954908047683958114",
+        "size": 129,
+        "lastModified": "2025-09-15T03:13:50.448Z",
+        "hash": "2234d8c6328e2dc28cf4b8de75159401"
+      }
+    ],
+    [
+      ".ruff_cache/0.12.12/9173639657676304757",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.ruff_cache/0.12.12/9173639657676304757",
+        "relativePath": ".ruff_cache/0.12.12/9173639657676304757",
+        "size": 128,
+        "lastModified": "2025-09-15T03:13:50.450Z",
+        "hash": "ddfd6322357fc309efb7395e92481cd8"
+      }
+    ],
+    [
+      ".claude_agent_farm_backups/settings_2025-09-15T01-13-58-724Z.json",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.claude_agent_farm_backups/settings_2025-09-15T01-13-58-724Z.json",
+        "relativePath": ".claude_agent_farm_backups/settings_2025-09-15T01-13-58-724Z.json",
+        "size": 2,
+        "lastModified": "2025-09-15T01:13:58.738Z",
+        "hash": "99914b932bd37a50b983c5e7c90ae93b",
+        "language": "json"
+      }
+    ],
+    [
+      ".codacy/tools-configs/languages-config.yaml",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.codacy/tools-configs/languages-config.yaml",
+        "relativePath": ".codacy/tools-configs/languages-config.yaml",
+        "size": 189,
+        "lastModified": "2025-09-15T01:14:11.460Z",
+        "hash": "c93eb6886c2be59f8fa575a9c2739767",
         "language": "yaml"
       }
     ],
     [
-      "demo_crewai_integration.py",
+      ".codacy/tools-configs/semgrep.yaml",
       {
-        "path": "/home/cbwinslow/Documents/mcp-server/demo_crewai_integration.py",
-        "relativePath": "demo_crewai_integration.py",
-        "size": 5678,
-        "lastModified": "2025-09-14T13:44:00.854Z",
-        "hash": "beadbef6e1eeb2161c6be974080170f3",
-        "language": "python"
+        "path": "/home/cbwinslow/Documents/mcp-server/.codacy/tools-configs/semgrep.yaml",
+        "relativePath": ".codacy/tools-configs/semgrep.yaml",
+        "size": 1434176,
+        "lastModified": "2025-09-15T01:14:21.784Z",
+        "hash": "a7b598c31326a0fd1a419d3d77e5e7bf",
+        "language": "yaml"
+      }
+    ],
+    [
+      ".codacy/tools-configs/trivy.yaml",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.codacy/tools-configs/trivy.yaml",
+        "relativePath": ".codacy/tools-configs/trivy.yaml",
+        "size": 94,
+        "lastModified": "2025-09-15T01:14:22.067Z",
+        "hash": "874980c67e727321ebe7e1806daf29e8",
+        "language": "yaml"
+      }
+    ],
+    [
+      ".claude_agent_farm_backups/settings_2025-09-15T01-17-39-010Z.json",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.claude_agent_farm_backups/settings_2025-09-15T01-17-39-010Z.json",
+        "relativePath": ".claude_agent_farm_backups/settings_2025-09-15T01-17-39-010Z.json",
+        "size": 2,
+        "lastModified": "2025-09-15T01:17:39.030Z",
+        "hash": "99914b932bd37a50b983c5e7c90ae93b",
+        "language": "json"
+      }
+    ],
+    [
+      ".claude_agent_farm_backups/settings_2025-09-15T01-21-25-134Z.json",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.claude_agent_farm_backups/settings_2025-09-15T01-21-25-134Z.json",
+        "relativePath": ".claude_agent_farm_backups/settings_2025-09-15T01-21-25-134Z.json",
+        "size": 2,
+        "lastModified": "2025-09-15T01:21:25.255Z",
+        "hash": "99914b932bd37a50b983c5e7c90ae93b",
+        "language": "json"
+      }
+    ],
+    [
+      ".claude_agent_farm_backups/settings_2025-09-15T01-25-04-779Z.json",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.claude_agent_farm_backups/settings_2025-09-15T01-25-04-779Z.json",
+        "relativePath": ".claude_agent_farm_backups/settings_2025-09-15T01-25-04-779Z.json",
+        "size": 2,
+        "lastModified": "2025-09-15T01:25:04.778Z",
+        "hash": "99914b932bd37a50b983c5e7c90ae93b",
+        "language": "json"
+      }
+    ],
+    [
+      ".claude_agent_farm_backups/settings_2025-09-15T01-28-08-769Z.json",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.claude_agent_farm_backups/settings_2025-09-15T01-28-08-769Z.json",
+        "relativePath": ".claude_agent_farm_backups/settings_2025-09-15T01-28-08-769Z.json",
+        "size": 2,
+        "lastModified": "2025-09-15T01:28:08.770Z",
+        "hash": "99914b932bd37a50b983c5e7c90ae93b",
+        "language": "json"
+      }
+    ],
+    [
+      ".claude_agent_farm_backups/settings_2025-09-15T01-35-00-631Z.json",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.claude_agent_farm_backups/settings_2025-09-15T01-35-00-631Z.json",
+        "relativePath": ".claude_agent_farm_backups/settings_2025-09-15T01-35-00-631Z.json",
+        "size": 2,
+        "lastModified": "2025-09-15T01:35:00.654Z",
+        "hash": "99914b932bd37a50b983c5e7c90ae93b",
+        "language": "json"
+      }
+    ],
+    [
+      "infra/.env.example",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/infra/.env.example",
+        "relativePath": "infra/.env.example",
+        "size": 739,
+        "lastModified": "2025-09-15T03:09:43.078Z",
+        "hash": "160934def82a10ea13b2f88337290f0e"
+      }
+    ],
+    [
+      "infra/supabase/overrides.yml",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/infra/supabase/overrides.yml",
+        "relativePath": "infra/supabase/overrides.yml",
+        "size": 532,
+        "lastModified": "2025-09-15T03:10:14.416Z",
+        "hash": "07ffe39481047b250876b9c6ca3b8f53",
+        "language": "yaml"
+      }
+    ],
+    [
+      "infra/pigsty/inventory.ini",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/infra/pigsty/inventory.ini",
+        "relativePath": "infra/pigsty/inventory.ini",
+        "size": 220,
+        "lastModified": "2025-09-15T03:10:26.209Z",
+        "hash": "95579c560bb542890f564e5e4ca9a764"
+      }
+    ],
+    [
+      "infra/pigsty/bootstrap_pigsty.sh",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/infra/pigsty/bootstrap_pigsty.sh",
+        "relativePath": "infra/pigsty/bootstrap_pigsty.sh",
+        "size": 574,
+        "lastModified": "2025-09-15T03:10:30.553Z",
+        "hash": "582ec9339a6800f1dee8c2cf1b935ac7",
+        "language": "shellscript"
+      }
+    ],
+    [
+      "infra/pigsty/apply_sql.sh",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/infra/pigsty/apply_sql.sh",
+        "relativePath": "infra/pigsty/apply_sql.sh",
+        "size": 513,
+        "lastModified": "2025-09-15T03:10:34.703Z",
+        "hash": "2ab067e1ac784104e7cdebcec2d36795",
+        "language": "shellscript"
+      }
+    ],
+    [
+      "infra/pigsty/bootstrap/10_db_mcp.sql",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/infra/pigsty/bootstrap/10_db_mcp.sql",
+        "relativePath": "infra/pigsty/bootstrap/10_db_mcp.sql",
+        "size": 120,
+        "lastModified": "2025-09-15T03:10:40.246Z",
+        "hash": "dee00929a6a33a0e16759a333eba9a44",
+        "language": "sql",
+        "symbols": [
+          {
+            "name": "mcp",
+            "kind": 20,
+            "range": [
+              {
+                "line": 1,
+                "character": 0
+              },
+              {
+                "line": 2,
+                "character": 48
+              }
+            ],
+            "children": []
+          }
+        ]
+      }
+    ],
+    [
+      "infra/pigsty/bootstrap/20_extensions.sql",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/infra/pigsty/bootstrap/20_extensions.sql",
+        "relativePath": "infra/pigsty/bootstrap/20_extensions.sql",
+        "size": 133,
+        "lastModified": "2025-09-15T03:10:42.494Z",
+        "hash": "9f2aa87a401de59dc223bd08001c9e8e",
+        "language": "sql"
+      }
+    ],
+    [
+      "infra/pigsty/bootstrap/30_db_langfuse.sql",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/infra/pigsty/bootstrap/30_db_langfuse.sql",
+        "relativePath": "infra/pigsty/bootstrap/30_db_langfuse.sql",
+        "size": 128,
+        "lastModified": "2025-09-15T03:10:45.798Z",
+        "hash": "5cd6d6a84a710f6605db5cdde61e2012",
+        "language": "sql",
+        "symbols": [
+          {
+            "name": "langfuse",
+            "kind": 20,
+            "range": [
+              {
+                "line": 1,
+                "character": 0
+              },
+              {
+                "line": 2,
+                "character": 54
+              }
+            ],
+            "children": []
+          }
+        ]
+      }
+    ],
+    [
+      "docs/DEPLOYMENT.md",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/docs/DEPLOYMENT.md",
+        "relativePath": "docs/DEPLOYMENT.md",
+        "size": 1679,
+        "lastModified": "2025-09-15T03:11:07.829Z",
+        "hash": "53251dc772ebb30faef7232277b8b0b2",
+        "language": "markdown"
+      }
+    ],
+    [
+      "docs/AI_STACK_CHOICES.md",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/docs/AI_STACK_CHOICES.md",
+        "relativePath": "docs/AI_STACK_CHOICES.md",
+        "size": 1528,
+        "lastModified": "2025-09-15T03:11:16.386Z",
+        "hash": "e143e55b4a63b8bcc8f2e836d4f0738d",
+        "language": "markdown"
+      }
+    ],
+    [
+      ".claude_agent_farm_backups/settings_2025-09-15T03-14-06-622Z.json",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.claude_agent_farm_backups/settings_2025-09-15T03-14-06-622Z.json",
+        "relativePath": ".claude_agent_farm_backups/settings_2025-09-15T03-14-06-622Z.json",
+        "size": 2,
+        "lastModified": "2025-09-15T03:14:06.623Z",
+        "hash": "99914b932bd37a50b983c5e7c90ae93b",
+        "language": "json"
       }
     ]
   ],
@@ -1401,42 +720,46 @@
     ]
   },
   "codebaseStats": {
-    "totalFiles": 62,
-    "totalLines": 1541,
+    "totalFiles": 63,
+    "totalLines": 304,
     "filesByLanguage": [
       [
         "json",
-        5027
+        14489
       ],
       [
         "yaml",
-        2452
+        6971
       ],
       [
         "markdown",
-        4713
+        7304
       ],
       [
         "shellscript",
-        2472
+        4446
       ],
       [
         "python",
-        7973
+        8606
       ],
       [
         "xml",
-        146
+        180
+      ],
+      [
+        "sql",
+        96
       ]
     ],
-    "avgFileSize": 26174.064516129034,
+    "avgFileSize": 24234.74603174603,
     "largestFiles": [
       {
         "path": "/home/cbwinslow/Documents/mcp-server/.codacy/tools-configs/semgrep.yaml",
         "relativePath": ".codacy/tools-configs/semgrep.yaml",
-        "size": 1444839,
-        "lastModified": "2025-09-14T13:33:44.019Z",
-        "hash": "fffb0e10e1a6a2c2c4d922e958ac906a",
+        "size": 1434176,
+        "lastModified": "2025-09-15T01:14:21.784Z",
+        "hash": "a7b598c31326a0fd1a419d3d77e5e7bf",
         "language": "yaml"
       },
       {
@@ -1448,68 +771,67 @@
         "language": "json"
       },
       {
-        "path": "/home/cbwinslow/Documents/mcp-server/crewai_tools.py",
-        "relativePath": "crewai_tools.py",
-        "size": 14500,
-        "lastModified": "2025-09-14T13:44:00.845Z",
-        "hash": "6e4794e093c3c5ed9c0bf7ba1e48791a",
-        "language": "python"
+        "path": "/home/cbwinslow/Documents/mcp-server/.autoclaude/scripts/test-check.sh",
+        "relativePath": ".autoclaude/scripts/test-check.sh",
+        "size": 3890,
+        "lastModified": "2025-09-14T11:12:39.034Z",
+        "hash": "4688f984a9a70bb7da48f2c45c611da3",
+        "language": "shellscript"
       },
       {
-        "path": "/home/cbwinslow/Documents/mcp-server/crewai_agent.py",
-        "relativePath": "crewai_agent.py",
-        "size": 11417,
-        "lastModified": "2025-09-14T13:44:00.846Z",
-        "hash": "43db276e8b02f0be130fbde8d8b585ad",
-        "language": "python"
+        "path": "/home/cbwinslow/Documents/mcp-server/.codacy/cli.sh",
+        "relativePath": ".codacy/cli.sh",
+        "size": 3818,
+        "lastModified": "2025-09-14T13:31:13.738Z",
+        "hash": "2f4fa02488b6fc250d942915bebb11f3",
+        "language": "shellscript"
       },
       {
-        "path": "/home/cbwinslow/Documents/mcp-server/crewai_advanced_config.yaml",
-        "relativePath": "crewai_advanced_config.yaml",
-        "size": 10218,
-        "lastModified": "2025-09-14T13:44:00.854Z",
-        "hash": "8df617dc9c5e1fa9b851e5d0f1ecb346",
-        "language": "yaml"
-      },
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/.codacy/tools-configs/ruleset.xml",
-        "relativePath": ".codacy/tools-configs/ruleset.xml",
-        "size": 10106,
-        "lastModified": "2025-09-14T13:31:22.351Z",
-        "hash": "e9602d9bbe68aaa0f3690e7a9951c1d3",
-        "language": "xml"
-      },
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/.codacy/tools-configs/analysis_options.yaml",
-        "relativePath": ".codacy/tools-configs/analysis_options.yaml",
-        "size": 9281,
-        "lastModified": "2025-09-14T13:31:15.881Z",
-        "hash": "36910684fda7b41b4891198f6301f08b",
-        "language": "yaml"
-      },
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/README-crewai.md",
-        "relativePath": "README-crewai.md",
-        "size": 8470,
-        "lastModified": "2025-09-14T13:44:00.854Z",
-        "hash": "1d3c5f3631456a5c8fe54825ffcade05",
+        "path": "/home/cbwinslow/Documents/mcp-server/.specstory/.what-is-this.md",
+        "relativePath": ".specstory/.what-is-this.md",
+        "size": 3383,
+        "lastModified": "2025-09-14T11:32:40.606Z",
+        "hash": "570297a15f17ca21b0b94aef11d91c9f",
         "language": "markdown"
       },
       {
-        "path": "/home/cbwinslow/Documents/mcp-server/crewai_config.yaml",
-        "relativePath": "crewai_config.yaml",
-        "size": 7140,
-        "lastModified": "2025-09-14T13:44:00.844Z",
-        "hash": "631bb57c1321f63bbaced0018e2b29a4",
-        "language": "yaml"
+        "path": "/home/cbwinslow/Documents/mcp-server/.autoclaude/config.json",
+        "relativePath": ".autoclaude/config.json",
+        "size": 3292,
+        "lastModified": "2025-09-15T03:13:43.976Z",
+        "hash": "7c852d4e074a92f52b6d1172d4fc3192",
+        "language": "json"
       },
       {
-        "path": "/home/cbwinslow/Documents/mcp-server/demo_crewai_integration.py",
-        "relativePath": "demo_crewai_integration.py",
-        "size": 5678,
-        "lastModified": "2025-09-14T13:44:00.854Z",
-        "hash": "beadbef6e1eeb2161c6be974080170f3",
-        "language": "python"
+        "path": "/home/cbwinslow/Documents/mcp-server/.autoclaude/enhanced-config.json",
+        "relativePath": ".autoclaude/enhanced-config.json",
+        "size": 3037,
+        "lastModified": "2025-09-14T11:12:30.640Z",
+        "hash": "74ecc31331e2b270a44e3cf608a8ed7b",
+        "language": "json"
+      },
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/pyproject.toml",
+        "relativePath": "pyproject.toml",
+        "size": 2453,
+        "lastModified": "2025-09-14T16:06:41.120Z",
+        "hash": "d5c004943a5f9e61fbcc2fe5029e5a6b"
+      },
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.autoclaude/CLAUDE_CONTEXT.md",
+        "relativePath": ".autoclaude/CLAUDE_CONTEXT.md",
+        "size": 2421,
+        "lastModified": "2025-09-15T03:13:44.848Z",
+        "hash": "e1087256de231075671c0d46ad6e8e08",
+        "language": "markdown"
+      },
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/docs/DEPLOYMENT.md",
+        "relativePath": "docs/DEPLOYMENT.md",
+        "size": 1679,
+        "lastModified": "2025-09-15T03:11:07.829Z",
+        "hash": "53251dc772ebb30faef7232277b8b0b2",
+        "language": "markdown"
       }
     ]
   }

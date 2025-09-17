@@ -14,7 +14,7 @@ dependencies = [
     "fastapi>=0.104.0",
     "uvicorn>=0.24.0",
     "pydantic>=2.0.0",
-    "sqlalchemy>=2.0.0",
+    "sqlalchemy[asyncio]>=2.0.0",
     "alembic>=1.12.0",
 
     # GitHub integration
@@ -46,10 +46,39 @@ dependencies = [
 
     # Logging
     "structlog>=23.1.0",
+    "slowapi>=0.1.9",
+    "prometheus-client>=0.20.0",
+    "sentry-sdk>=2.8.0",
+    "opentelemetry-sdk>=1.25.0",
+    "opentelemetry-instrumentation-fastapi>=0.46b0",
+    "opentelemetry-instrumentation-requests>=0.46b0",
 
     # Optional OpenAI integration
     "openai>=1.0.0",
     "pymongo>=4.6.0",
+    # Postgres (async)
+    "asyncpg>=0.29.0",
+    # Auth
+    "PyJWT>=2.8.0",
+    # Neo4j driver
+    "neo4j>=5.16.0",
+    # Optional graph backends
+    "terminusdb-client>=10.0.0",
+    "nebula3-python>=3.8.0",
+    # Agents
+    "pydantic-ai>=0.0.8",
+    # LlamaIndex & friends
+    "llama-index>=0.11.0",
+    "llama-index-vector-stores-postgres>=0.2.0",
+    "llama-index-graph-stores-neo4j>=0.2.0",
+    "llama-parse>=0.4.0",
+    "llama-hub>=0.0.79",
+    # Graphiti core for temporal KG (HTTP shim)
+    "graphiti-core>=0.1.0",
+    # Repo ingestion
+    "gitpython>=3.1.40",
+    # SSE client (for future Graphiti MCP direct integration)
+    "aiohttp>=3.9.0",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
