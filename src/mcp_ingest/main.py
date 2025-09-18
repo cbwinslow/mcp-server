@@ -128,7 +128,11 @@ async def add_request_id(request: Request, call_next):
     return response
 
 @app.get("/metrics")
-async def metrics():
+async def metrics(authorization: Optional[str] = None):
+    # Optional protection for metrics endpoint
+    if os.getenv("REQUIRE_AUTH_METRICS", "false").lower() in {"1","true","yes"}:
+        # Reuse JWT verification; do not require admin
+        await verify_jwt(authorization)
     data = generate_latest(registry)
     from fastapi.responses import Response
     return Response(content=data, media_type=CONTENT_TYPE_LATEST)
@@ -197,6 +201,112 @@ async def get_validation_report(name: str, auth=Depends(verify_jwt)):
         return PlainTextResponse(content=data, media_type='application/json')
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/admin/validation/last")
+@limiter.limit("30/minute")
+async def get_last_validation(auth=Depends(verify_jwt)):
+    require_admin(auth)
+    base = Path("/var/log/mcp")
+    if not base.exists():
+        return {"status":"success","latest":None,"previous":None}
+    files = sorted(base.glob("validation-*.json"), key=lambda x: x.name, reverse=True)
+    out = {"status":"success","latest":None,"previous":None}
+    def read(p: Path):
+        try:
+            import json as _json
+            data = _json.loads(p.read_text()[:2_000_000])
+            score = data.get('score')
+            return {
+                'name': p.name,
+                'modified': datetime.utcfromtimestamp(p.stat().st_mtime).isoformat()+'Z',
+                'size': p.stat().st_size,
+                'score': score,
+                'summary': data.get('summary',''),
+            }
+        except Exception:
+            return None
+    if files:
+        out['latest'] = read(files[0])
+    if len(files) > 1:
+        out['previous'] = read(files[1])
+    return out
+
+
+class SeedSampleRequest(BaseModel):
+    repos: int = 5
+    files_per_repo: int = 2
+    chunks_per_file: int = 2
+    dry_run: bool = True
+
+
+@app.post("/admin/seed/sample")
+@limiter.limit("10/minute")
+async def seed_sample(req: SeedSampleRequest, auth=Depends(verify_jwt)):
+    require_admin(auth)
+    import uuid as _uuid
+    import random as _rand
+    repos = max(0, min(req.repos, 100))
+    fpr = max(0, min(req.files_per_repo, 20))
+    cpf = max(0, min(req.chunks_per_file, 50))
+    inserted = {"repositories": 0, "files": 0, "chunks": 0}
+    if req.dry_run:
+        return {"status": "success", "dry_run": True, "would_insert": {"repositories": repos, "files": repos*fpr, "chunks": repos*fpr*cpf}}
+    async with db.engine.begin() as conn:
+        for ri in range(repos):
+            rid = str(_uuid.uuid4())
+            name = f"sample-repo-{ri+1}"
+            await conn.execute(sql_text(
+                """
+                INSERT INTO repositories (id, name, owner, url, description, language, stars, forks, added_at, processed)
+                VALUES (:id, :name, 'sample', :url, :desc, :lang, :stars, :forks, now(), false)
+                """),
+                {"id": rid, "name": name, "url": f"https://example.com/{name}", "desc": "Sample repository", "lang": "Python", "stars": _rand.randint(0, 200), "forks": _rand.randint(0, 50)}
+            )
+            inserted["repositories"] += 1
+            for fi in range(fpr):
+                fid = str(_uuid.uuid4())
+                path = f"/src/module_{fi+1}.py"
+                await conn.execute(sql_text(
+                    """
+                    INSERT INTO files (id, repository_id, path, size, sha256, created_at, updated_at)
+                    VALUES (:id, :rid, :path, :size, :sha, now(), now())
+                    """),
+                    {"id": fid, "rid": rid, "path": path, "size": _rand.randint(100, 5000), "sha": None}
+                )
+                inserted["files"] += 1
+                for ci in range(cpf):
+                    cid = str(_uuid.uuid4())
+                    await conn.execute(sql_text(
+                        """
+                        INSERT INTO chunks (id, file_id, index, text, created_at)
+                        VALUES (:id, :fid, :idx, :text, now())
+                        """),
+                        {"id": cid, "fid": fid, "idx": ci, "text": f"Sample chunk {ci+1} for {path}"}
+                    )
+                    inserted["chunks"] += 1
+    audit("seed_sample", **inserted)
+    return {"status": "success", "inserted": inserted}
+
+
+@app.post("/admin/seed/clear")
+@limiter.limit("10/minute")
+async def seed_clear(auth=Depends(verify_jwt)):
+    require_admin(auth)
+    deleted = {"chunks": 0, "files": 0, "repositories": 0}
+    async with db.engine.begin() as conn:
+        r = await conn.execute(sql_text("""
+            DELETE FROM chunks WHERE file_id IN (
+              SELECT id FROM files WHERE repository_id IN (SELECT id FROM repositories WHERE owner = 'sample')
+            )
+        """))
+        deleted["chunks"] = r.rowcount or 0
+        r = await conn.execute(sql_text("DELETE FROM files WHERE repository_id IN (SELECT id FROM repositories WHERE owner = 'sample')"))
+        deleted["files"] = r.rowcount or 0
+        r = await conn.execute(sql_text("DELETE FROM repositories WHERE owner = 'sample'"))
+        deleted["repositories"] = r.rowcount or 0
+    audit("seed_clear", **deleted)
+    return {"status": "success", "deleted": deleted}
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL or DATABASE_URL.startswith("sqlite"):

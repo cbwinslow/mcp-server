@@ -64,6 +64,18 @@ export default function Settings() {
     finally { setSaving(false); }
   }
 
+  async function saveAndRestart() {
+    await saveWithConfirm();
+    try {
+      const s = await apiGet('/admin/settings');
+      const allowed = s.settings?.admin?.allowed_units || [];
+      for (const u of allowed) {
+        try { await apiPost('/admin/services/action', { unit: u, action: 'restart' }); } catch (e) {}
+      }
+      alert('Restarted allowed services.');
+    } catch (e) { alert('Restart failed: '+e); }
+  }
+
   function setValue(path, value) {
     const parts = path.split('.');
     const next = JSON.parse(JSON.stringify(settings));
@@ -246,7 +258,10 @@ export default function Settings() {
       </div>)}
 
       <div className="section">
-        <button className="btn" onClick={saveWithConfirm} disabled={saving}>{saving? 'Saving...':'Save Settings'}</button>
+        <div className="row">
+          <button className="btn" onClick={saveWithConfirm} disabled={saving}>{saving? 'Saving...':'Save Settings'}</button>
+          <button className="btn secondary" onClick={saveAndRestart} disabled={saving}>Save & Restart All</button>
+        </div>
       </div>
     </Layout>
   );

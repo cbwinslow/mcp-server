@@ -1,5 +1,5 @@
 import Layout from '../components/Layout';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { apiPost, apiGet, apiStream } from '../lib/api';
 
 export default function Admin() {
@@ -24,6 +24,35 @@ export default function Admin() {
   const [lastSeq, setLastSeq] = useState(0);
   const [reports, setReports] = useState([]);
   const [reportView, setReportView] = useState({ name: '', content: '' });
+  const [logView, setLogView] = useState('json'); // 'json' | 'table'
+  const logsBoxRef = useRef(null);
+  const streamBoxRef = useRef(null);
+  const [lastVal, setLastVal] = useState(null);
+
+  useEffect(()=>{
+    if (logsBoxRef.current) {
+      logsBoxRef.current.scrollTop = logsBoxRef.current.scrollHeight;
+    }
+  }, [logs]);
+  useEffect(()=>{
+    if (streamBoxRef.current) {
+      streamBoxRef.current.scrollTop = streamBoxRef.current.scrollHeight;
+    }
+  }, [streamLog]);
+
+  function colorForEvent(ev) {
+    if (!ev) return '#334155';
+    if (ev.includes('error')) return '#dc2626';
+    const map = {
+      connectivity_test: '#0ea5e9',
+      graph_test: '#22c55e',
+      migration_v2_run: '#eab308',
+      migration_v2_stream_start: '#a78bfa',
+      services_action: '#f97316',
+      settings_updated: '#2dd4bf',
+    };
+    return map[ev] || '#334155';
+  }
   useEffect(()=>{
     let t;
     if (logsAuto) {
@@ -48,6 +77,7 @@ export default function Admin() {
         setUnits(allowed);
         const st = await apiPost('/admin/services/status', { units: allowed });
         setStatus(st.services || {});
+        try { const lv = await apiGet('/admin/validation/last'); setLastVal(lv); } catch {}
       } catch (e) {}
     })();
   }, []);
@@ -90,6 +120,22 @@ export default function Admin() {
             </div>
           </div>
         ))}
+        <div className="card">
+          <h3>Validation Status</h3>
+          {lastVal && lastVal.latest ? (
+            <>
+              <div className="row">
+                <span className="badge" style={{background:'#0ea5e9'}}>Latest: {lastVal.latest.score ?? 'N/A'}</span>
+                {lastVal.previous && lastVal.previous.score != null && lastVal.latest.score != null && (
+                  <span className="badge" style={{background: (lastVal.latest.score - lastVal.previous.score)>=0? '#22c55e':'#dc2626'}}>
+                    Δ {((lastVal.latest.score - lastVal.previous.score)>=0? '+':'')}{(lastVal.latest.score - lastVal.previous.score)}
+                  </span>
+                )}
+              </div>
+              <small>Updated: {new Date(lastVal.latest.modified).toLocaleString()}</small>
+            </>
+          ) : (<div>No validation reports found.</div>)}
+        </div>
       </div>
       <div className="card" style={{marginTop:16}}>
         <h3>Backends Admin</h3>
@@ -98,6 +144,8 @@ export default function Admin() {
           <button className="btn secondary" onClick={migrate}>Migrate Repos → TerminusDB</button>
           <button className="btn" onClick={validate}>Run Validation</button>
           <button className="btn secondary" onClick={restartAll}>Restart All Allowed Services</button>
+          <button className="btn secondary" onClick={async()=>{ try { const r = await apiPost('/admin/seed/sample', { repos: 5, files_per_repo: 2, chunks_per_file: 2, dry_run: false }); alert(`Seeded: ${JSON.stringify(r.inserted||r)}`); } catch(e){ alert('Seed failed: '+e);} }}>Seed Sample Data</button>
+          <button className="btn secondary" onClick={async()=>{ try { const r = await apiPost('/admin/seed/clear', {}); alert(`Cleared: ${JSON.stringify(r.deleted||r)}`); } catch(e){ alert('Clear failed: '+e);} }}>Clear Sample Data</button>
         </div>
         <pre className="monospace">{out}</pre>
       </div>
@@ -158,9 +206,7 @@ export default function Admin() {
             <div style={{fontSize:12, opacity:0.8, marginTop:4}}>{progress.done} / {progress.total} items</div>
           </div>
         )}
-        <pre className="monospace" style={{maxHeight:200, overflowY:'auto'}}>
-          {streamLog}
-        </pre>
+        <pre ref={streamBoxRef} className="monospace" style={{maxHeight:200, overflowY:'auto'}}>{streamLog}</pre>
         <div className="row" style={{gap:8}}>
           <button className="btn secondary" onClick={()=> setStreamLog('')}>Clear</button>
           <button className="btn secondary" disabled={!lastSummary} onClick={()=>{
@@ -252,8 +298,44 @@ export default function Admin() {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = 'audit-logs.csv'; a.click(); URL.revokeObjectURL(url);
           }}>Download CSV</button>
+          <label style={{marginLeft:8}}>
+            View:
+            <select className="input" value={logView} onChange={e=>setLogView(e.target.value)}>
+              <option value="json">JSON</option>
+              <option value="table">Table</option>
+            </select>
+          </label>
         </div>
-        <pre className="monospace" style={{maxHeight:240, overflowY:'auto'}}>{JSON.stringify(logs, null, 2)}</pre>
+        {logView==='json' ? (
+          <pre ref={logsBoxRef} className="monospace" style={{maxHeight:240, overflowY:'auto'}}>{JSON.stringify(logs, null, 2)}</pre>
+        ) : (
+          <div style={{overflowX:'auto'}}>
+            <table className="monospace" style={{width:'100%'}}>
+              <thead>
+                <tr>
+                  <th align="left">Time</th>
+                  <th align="left">Event</th>
+                  <th align="left">User</th>
+                  <th align="left">Role</th>
+                  <th align="left">ReqID</th>
+                  <th align="left">Data</th>
+                </tr>
+              </thead>
+              <tbody>
+                {logs.map((e,idx)=> (
+                  <tr key={idx}>
+                    <td>{e.ts}</td>
+                    <td><span style={{background: colorForEvent(e.event), color:'#0b1220', padding:'2px 6px', borderRadius:6}}>{e.event}</span></td>
+                    <td>{e.user_id||''}</td>
+                    <td>{e.role||''}</td>
+                    <td>{e.request_id||''}</td>
+                    <td style={{maxWidth:420, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>{JSON.stringify(e.data||{})}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <div className="card" style={{marginTop:16}}>

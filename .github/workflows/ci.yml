@@ -81,6 +81,25 @@ jobs:
       - name: Run validator script (dry)
         run: |
           python scripts/server/run_validation.py > validation-report.json || true
+      - name: Extract score
+        id: score
+        run: |
+          python - <<'PY'
+import json,sys
+try:
+  data=json.load(open('validation-report.json'))
+  print(f"score={int(data.get('score') or 0)}")
+except Exception:
+  print("score=0")
+PY
+      - name: Set job summary and warn
+        env:
+          MIN: ${{ vars.VALIDATION_MIN_SCORE || '70' }}
+        run: |
+          echo "## Validation Score: ${{ steps.score.outputs.score }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.score.outputs.score }}" -lt "$MIN" ]; then
+            echo "::warning::Validation score ${{ steps.score.outputs.score }} below threshold $MIN"
+          fi
       - name: Upload validation report artifact
         uses: actions/upload-artifact@v4
         with:

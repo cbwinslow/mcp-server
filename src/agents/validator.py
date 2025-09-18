@@ -3,7 +3,7 @@ from __future__ import annotations
 Validation agent using pydantic-ai to compare backends and run integrity checks.
 """
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import os
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import text as sql_text
@@ -23,14 +23,28 @@ async def run_validation(prefer: Optional[str] = None) -> Dict[str, Any]:
     pg_url = os.getenv('DATABASE_URL')
     engine = create_async_engine(pg_url)
     async with engine.begin() as conn:
-        def one(q):
-            return (await conn.execute(sql_text(q))).mappings().first()
         repos_c = (await conn.execute(sql_text('SELECT count(1) AS c FROM repositories'))).scalar()
         files_c = (await conn.execute(sql_text('SELECT count(1) AS c FROM files'))).scalar() if (await conn.exec_driver_sql("SELECT to_regclass('public.files')")).scalar() else 0
         chunks_c = (await conn.execute(sql_text('SELECT count(1) AS c FROM chunks'))).scalar() if (await conn.exec_driver_sql("SELECT to_regclass('public.chunks')")).scalar() else 0
         embeds_c = (await conn.execute(sql_text('SELECT count(1) AS c FROM embeddings'))).scalar()
         null_files = (await conn.execute(sql_text('SELECT count(1) FROM files WHERE repository_id IS NULL'))).scalar() if files_c else 0
         null_chunks = (await conn.execute(sql_text('SELECT count(1) FROM chunks WHERE file_id IS NULL'))).scalar() if chunks_c else 0
+        # Dangling refs
+        dang_files = 0
+        dang_chunks = 0
+        if files_c:
+            dang_files = (await conn.execute(sql_text('SELECT count(1) FROM files f LEFT JOIN repositories r ON f.repository_id=r.id WHERE f.repository_id IS NOT NULL AND r.id IS NULL'))).scalar()
+        if chunks_c:
+            dang_chunks = (await conn.execute(sql_text('SELECT count(1) FROM chunks c LEFT JOIN files f ON c.file_id=f.id WHERE c.file_id IS NOT NULL AND f.id IS NULL'))).scalar()
+        # Duplicates by repo URL if column exists
+        dup_urls_rows: List[Dict[str, Any]] = []
+        try:
+            dup_urls_rows = (await conn.execute(sql_text("SELECT url, COUNT(1) as c FROM repositories GROUP BY url HAVING COUNT(1) > 1 LIMIT 50"))).mappings().all()
+        except Exception:
+            dup_urls_rows = []
+        # Embeddings health
+        embeds_null_vec = (await conn.execute(sql_text("SELECT count(1) FROM embeddings WHERE embedding_vector IS NULL OR embedding_vector = ''"))).scalar()
+        embeds_null_model = (await conn.execute(sql_text("SELECT count(1) FROM embeddings WHERE model_name IS NULL OR model_name = ''"))).scalar()
 
     # Graph snapshot for Repo/File/Chunk/Embedding
     graph_counts: Dict[str, int] = {}
@@ -62,9 +76,21 @@ async def run_validation(prefer: Optional[str] = None) -> Dict[str, Any]:
         issues.append({ 'type': 'null_ref', 'entity': 'File', 'field': 'repository_id', 'count': int(null_files) })
     if null_chunks:
         issues.append({ 'type': 'null_ref', 'entity': 'Chunk', 'field': 'file_id', 'count': int(null_chunks) })
+    if dang_files:
+        issues.append({ 'type': 'dangling_ref', 'entity': 'File', 'field': 'repository_id', 'count': int(dang_files) })
+    if dang_chunks:
+        issues.append({ 'type': 'dangling_ref', 'entity': 'Chunk', 'field': 'file_id', 'count': int(dang_chunks) })
+    for row in dup_urls_rows:
+        issues.append({ 'type': 'duplicate', 'entity': 'Repository', 'field': 'url', 'url': row.get('url'), 'count': int(row.get('c') or 0) })
+    if embeds_null_vec:
+        issues.append({ 'type': 'missing_field', 'entity': 'Embedding', 'field': 'embedding_vector', 'count': int(embeds_null_vec) })
+    if embeds_null_model:
+        issues.append({ 'type': 'missing_field', 'entity': 'Embedding', 'field': 'model_name', 'count': int(embeds_null_model) })
 
     # Summarize
-    score = max(0, 100 - 10*len([i for i in issues if i.get('type')!='count_mismatch']) - 2*len([i for i in issues if i.get('type')=='count_mismatch']))
+    score = max(0, 100 - 10*len([i for i in issues if i.get('type') in {'null_ref','dangling_ref','missing_field'}])
+                     - 5*len([i for i in issues if i.get('type')=='duplicate'])
+                     - 2*len([i for i in issues if i.get('type')=='count_mismatch']))
 
     # Optional LLM summary
     system = "Summarize issues tersely; suggest next actions."  # keep it minimal if LLM unavailable

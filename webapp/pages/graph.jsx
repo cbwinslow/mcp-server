@@ -1,7 +1,7 @@
 import Layout from '../components/Layout';
 import { useEffect, useState } from 'react';
 import { apiPost, apiGet } from '../lib/api';
-import { listQueries, saveQuery, deleteQuery } from '../lib/storage';
+import { listQueries, saveQuery, deleteQuery, exportAll, importAll } from '../lib/storage';
 import GraphView from '../components/GraphView';
 import dynamic from 'next/dynamic';
 import useSWR from 'swr';
@@ -45,6 +45,17 @@ export default function Graph() {
   function onSaveQuery() { if (!queryName) return alert('Name required'); saveQuery(backend, queryName, cypher); setQueryName(''); refreshSaved(); }
   function onDeleteQuery(name) { deleteQuery(backend, name); refreshSaved(); }
   function onRunSaved(q) { setCypher(q.query); }
+  function onExportSaved() {
+    const blob = new Blob([exportAll()], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'saved-queries.json'; a.click(); URL.revokeObjectURL(url);
+  }
+  async function onImportSaved(ev) {
+    const f = ev.target.files?.[0]; if (!f) return;
+    const txt = await f.text();
+    if (!importAll(txt)) { alert('Import failed: invalid JSON'); return; }
+    refreshSaved(); alert('Saved queries imported.');
+  }
 
   return (
     <Layout active="/graph">
@@ -73,6 +84,11 @@ export default function Graph() {
           <div className="row">
             <input className="input" placeholder="Name" value={queryName} onChange={e=>setQueryName(e.target.value)} />
             <button className="btn" onClick={onSaveQuery}>Save</button>
+            <button className="btn secondary" onClick={onExportSaved}>Export All</button>
+            <label className="btn secondary" style={{cursor:'pointer'}}>
+              Import
+              <input type="file" accept="application/json" style={{display:'none'}} onChange={onImportSaved} />
+            </label>
           </div>
           <div className="section">
             {(queries||[]).length===0 && <div>No saved queries for {backend}.</div>}

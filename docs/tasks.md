@@ -27,7 +27,9 @@ Status codes: [P0]=now, [P1]=next, [P2]=later; (Done) when complete.
 - [P1] Settings: per-backend inline badges + timestamps (Done)
 - [P1] Graph: templates, color legend, label filter, search/focus, PNG/JSON (Done)
 - [P1] Admin: migration v2 Run & Run Live, progress, Download Summary (Done)
-- [P2] Admin: compact/detailed stream toggle, audit log viewer
+- [P1] Admin: compact/detailed stream toggle (Done)
+- [P1] Admin: audit log viewer with filters, auto-refresh, table/JSON view, downloads (Done)
+- [P1] Dashboard: show overall health and last validation score (Done)
 
 ## Infra/IaC
 - [P0] Ansible: CF KV secrets, env render, systemd, checks (Done)
