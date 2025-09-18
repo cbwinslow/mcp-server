@@ -1,6 +1,6 @@
 # AutoClaude Project Context
 
-Generated at: 2025-09-15T03:13:44.849Z
+Generated at: 2025-09-18T11:59:33.234Z
 
 ---
 
@@ -9,21 +9,21 @@ Generated at: 2025-09-15T03:13:44.849Z
 ## Workspace
 - **Root**: /home/cbwinslow/Documents/mcp-server
 - **Type**: single
-- **Last Updated**: 2025-09-15T03:13:44.553Z
+- **Last Updated**: 2025-09-18T11:59:04.356Z
 
 ## Statistics
 - **Total Files**: 63
 - **Estimated Lines**: 304
-- **Average File Size**: 24232 bytes
+- **Average File Size**: 24298 bytes
 
 ## Languages
-- **json**: 14121 files
-- **python**: 8583 files
-- **markdown**: 7166 files
-- **yaml**: 6787 files
-- **shellscript**: 4331 files
+- **json**: 28746 files
+- **yaml**: 14099 files
+- **markdown**: 12650 files
+- **python**: 9497 files
+- **shellscript**: 8901 files
+- **sql**: 2769 files
 - **xml**: 180 files
-- **sql**: 27 files
 
 ## Project Structure
 - **Main Languages**: Not detected
@@ -40,12 +40,12 @@ Generated at: 2025-09-15T03:13:44.849Z
 - package-lock.json (58KB)
 - .autoclaude/scripts/test-check.sh (4KB)
 - .codacy/cli.sh (4KB)
+- docs/DEPLOYMENT.md (3KB)
 - .specstory/.what-is-this.md (3KB)
+- pyproject.toml (3KB)
 - .autoclaude/config.json (3KB)
 - .autoclaude/enhanced-config.json (3KB)
-- pyproject.toml (2KB)
 - .autoclaude/CLAUDE_CONTEXT.md (2KB)
-- docs/DEPLOYMENT.md (2KB)
 
 
 ---
@@ -60,8 +60,8 @@ Generated at: 2025-09-15T03:13:44.849Z
 - **Failed**: 0
 
 ## Current Session
-- **Session ID**: mfkjux2s-w5bv01p
-- **Started**: 2025-09-15T03:13:43.924Z
+- **Session ID**: mfp5glz7-dhgw3pp
+- **Started**: 2025-09-18T08:29:32.611Z
 - **Tasks in Session**: 0
 
 ## Recent Tasks
@@ -82,24 +82,16 @@ No unfinished tasks
  M .autoclaude/CLAUDE_CONTEXT.md
  M .autoclaude/cache/project-index.json
  M .autoclaude/tasks/sessions.json
- M .codacy/codacy.yaml
+ D .claude_agent_farm_backups/settings_2025-09-14T11-19-11-081Z.json
  m web-interface
-?? .claude_agent_farm_backups/settings_2025-09-15T01-13-58-724Z.json
-?? .claude_agent_farm_backups/settings_2025-09-15T01-17-39-010Z.json
-?? .claude_agent_farm_backups/settings_2025-09-15T01-21-25-134Z.json
-?? .claude_agent_farm_backups/settings_2025-09-15T01-25-04-779Z.json
-?? .claude_agent_farm_backups/settings_2025-09-15T01-28-08-769Z.json
-?? .claude_agent_farm_backups/settings_2025-09-15T01-35-00-631Z.json
-?? .code/
-?? docs/AI_STACK_CHOICES.md
-?? docs/DEPLOYMENT.md
-?? infra/
-?? migrations/
+?? .claude_agent_farm_backups/settings_2025-09-18T08-29-44-434Z.json
 
 ```
 
 ### Recent Commits
 ```
+9e96caf rtert 	modified:   .github/workflows/ci.yml 	new file:   docs/VALIDATION.md 	modified:   docs/tasks.md 	modified:   src/agents/validator.py 	modified:   src/mcp_ingest/main.py 	modified:   webapp/pages/admin.jsx 	modified:   webapp/pages/graph.jsx 	modified:   webapp/pages/index.jsx 	modified:   webapp/pages/settings.jsx
+61f2798 feat(mcp-server): implement core mcp ingest server with database and api
 24a7220 feat(mcp-server): implement core mcp ingest server with database and api
 4142a16 one last commit
 42a60e2 Update project structure and add new features

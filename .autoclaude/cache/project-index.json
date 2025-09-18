@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "createdAt": "2025-09-14T11:12:38.856Z",
-  "lastUpdated": "2025-09-15T03:14:53.920Z",
+  "lastUpdated": "2025-09-18T12:02:27.415Z",
   "workspaceRoot": "/home/cbwinslow/Documents/mcp-server",
   "files": [
     [
@@ -51,9 +51,9 @@
       {
         "path": "/home/cbwinslow/Documents/mcp-server/Makefile",
         "relativePath": "Makefile",
-        "size": 0,
-        "lastModified": "2025-09-12T04:15:36.287Z",
-        "hash": "d41d8cd98f00b204e9800998ecf8427e"
+        "size": 683,
+        "lastModified": "2025-09-17T20:58:54.963Z",
+        "hash": "9cd3c48adffb3c7ca4a686ddaebd1548"
       }
     ],
     [
@@ -61,9 +61,9 @@
       {
         "path": "/home/cbwinslow/Documents/mcp-server/README.md",
         "relativePath": "README.md",
-        "size": 0,
-        "lastModified": "2025-09-12T04:15:35.113Z",
-        "hash": "d41d8cd98f00b204e9800998ecf8427e",
+        "size": 518,
+        "lastModified": "2025-09-15T17:20:07.146Z",
+        "hash": "1825e313e2bed2eeef0d0d94141803ae",
         "language": "markdown"
       }
     ],
@@ -105,9 +105,9 @@
       {
         "path": "/home/cbwinslow/Documents/mcp-server/pyproject.toml",
         "relativePath": "pyproject.toml",
-        "size": 2453,
-        "lastModified": "2025-09-14T16:06:41.120Z",
-        "hash": "d5c004943a5f9e61fbcc2fe5029e5a6b"
+        "size": 3335,
+        "lastModified": "2025-09-17T21:46:32.055Z",
+        "hash": "f7743f1f9ba24bdf49d1034f5b751e16"
       }
     ],
     [
@@ -126,9 +126,9 @@
       {
         "path": "/home/cbwinslow/Documents/mcp-server/.autoclaude/CLAUDE_CONTEXT.md",
         "relativePath": ".autoclaude/CLAUDE_CONTEXT.md",
-        "size": 2421,
-        "lastModified": "2025-09-15T03:13:44.848Z",
-        "hash": "e1087256de231075671c0d46ad6e8e08",
+        "size": 2453,
+        "lastModified": "2025-09-18T11:59:33.234Z",
+        "hash": "a293e0a5600b7e3c3216830109cc3c23",
         "language": "markdown"
       }
     ],
@@ -138,7 +138,7 @@
         "path": "/home/cbwinslow/Documents/mcp-server/.autoclaude/detected_problems.txt",
         "relativePath": ".autoclaude/detected_problems.txt",
         "size": 22,
-        "lastModified": "2025-09-15T03:14:05.971Z",
+        "lastModified": "2025-09-18T08:29:44.165Z",
         "hash": "f349cd4570e0ec5e3ff63fd895efb624"
       }
     ],
@@ -147,9 +147,9 @@
       {
         "path": "/home/cbwinslow/Documents/mcp-server/.autoclaude/tasks/sessions.json",
         "relativePath": ".autoclaude/tasks/sessions.json",
-        "size": 1167,
-        "lastModified": "2025-09-15T03:14:48.624Z",
-        "hash": "a463f8573c87bcb918b4e8694ff07dcb",
+        "size": 1269,
+        "lastModified": "2025-09-18T12:02:04.226Z",
+        "hash": "0ff7d28b46ca5a32e69ea535055495b8",
         "language": "json"
       }
     ],
@@ -159,7 +159,7 @@
         "path": "/home/cbwinslow/Documents/mcp-server/.autoclaude/tasks/tasks.json",
         "relativePath": ".autoclaude/tasks/tasks.json",
         "size": 2,
-        "lastModified": "2025-09-15T03:14:48.624Z",
+        "lastModified": "2025-09-18T12:02:04.226Z",
         "hash": "d751713988987e9331980363e24189ce",
         "language": "json"
       }
@@ -203,19 +203,8 @@
         "path": "/home/cbwinslow/Documents/mcp-server/.autoclaude/config.json",
         "relativePath": ".autoclaude/config.json",
         "size": 3292,
-        "lastModified": "2025-09-15T03:13:43.976Z",
+        "lastModified": "2025-09-18T08:29:32.829Z",
         "hash": "7c852d4e074a92f52b6d1172d4fc3192",
-        "language": "json"
-      }
-    ],
-    [
-      ".claude_agent_farm_backups/settings_2025-09-14T11-19-11-081Z.json",
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/.claude_agent_farm_backups/settings_2025-09-14T11-19-11-081Z.json",
-        "relativePath": ".claude_agent_farm_backups/settings_2025-09-14T11-19-11-081Z.json",
-        "size": 2,
-        "lastModified": "2025-09-14T11:19:11.081Z",
-        "hash": "99914b932bd37a50b983c5e7c90ae93b",
         "language": "json"
       }
     ],
@@ -280,7 +269,7 @@
         "path": "/home/cbwinslow/Documents/mcp-server/.codacy/codacy.yaml",
         "relativePath": ".codacy/codacy.yaml",
         "size": 78,
-        "lastModified": "2025-09-15T03:14:46.306Z",
+        "lastModified": "2025-09-18T12:02:27.333Z",
         "hash": "e6d468775d2a1cf10a31c285894ab132",
         "language": "yaml"
       }
@@ -679,9 +668,9 @@
       {
         "path": "/home/cbwinslow/Documents/mcp-server/docs/DEPLOYMENT.md",
         "relativePath": "docs/DEPLOYMENT.md",
-        "size": 1679,
-        "lastModified": "2025-09-15T03:11:07.829Z",
-        "hash": "53251dc772ebb30faef7232277b8b0b2",
+        "size": 3435,
+        "lastModified": "2025-09-17T22:29:25.764Z",
+        "hash": "352f48aa19f531f639d8c6fc7dd469c0",
         "language": "markdown"
       }
     ],
@@ -706,6 +695,17 @@
         "hash": "99914b932bd37a50b983c5e7c90ae93b",
         "language": "json"
       }
+    ],
+    [
+      ".claude_agent_farm_backups/settings_2025-09-18T08-29-44-434Z.json",
+      {
+        "path": "/home/cbwinslow/Documents/mcp-server/.claude_agent_farm_backups/settings_2025-09-18T08-29-44-434Z.json",
+        "relativePath": ".claude_agent_farm_backups/settings_2025-09-18T08-29-44-434Z.json",
+        "size": 2,
+        "lastModified": "2025-09-18T08:29:44.453Z",
+        "hash": "99914b932bd37a50b983c5e7c90ae93b",
+        "language": "json"
+      }
     ]
   ],
   "dependencies": {},
@@ -725,23 +725,23 @@
     "filesByLanguage": [
       [
         "json",
-        14489
+        28970
       ],
       [
         "yaml",
-        6971
+        14211
       ],
       [
         "markdown",
-        7304
+        12734
       ],
       [
         "shellscript",
-        4446
+        8971
       ],
       [
         "python",
-        8606
+        9511
       ],
       [
         "xml",
@@ -749,10 +749,10 @@
       ],
       [
         "sql",
-        96
+        2811
       ]
     ],
-    "avgFileSize": 24234.74603174603,
+    "avgFileSize": 24297.809523809523,
     "largestFiles": [
       {
         "path": "/home/cbwinslow/Documents/mcp-server/.codacy/tools-configs/semgrep.yaml",
@@ -787,6 +787,14 @@
         "language": "shellscript"
       },
       {
+        "path": "/home/cbwinslow/Documents/mcp-server/docs/DEPLOYMENT.md",
+        "relativePath": "docs/DEPLOYMENT.md",
+        "size": 3435,
+        "lastModified": "2025-09-17T22:29:25.764Z",
+        "hash": "352f48aa19f531f639d8c6fc7dd469c0",
+        "language": "markdown"
+      },
+      {
         "path": "/home/cbwinslow/Documents/mcp-server/.specstory/.what-is-this.md",
         "relativePath": ".specstory/.what-is-this.md",
         "size": 3383,
@@ -795,10 +803,17 @@
         "language": "markdown"
       },
       {
+        "path": "/home/cbwinslow/Documents/mcp-server/pyproject.toml",
+        "relativePath": "pyproject.toml",
+        "size": 3335,
+        "lastModified": "2025-09-17T21:46:32.055Z",
+        "hash": "f7743f1f9ba24bdf49d1034f5b751e16"
+      },
+      {
         "path": "/home/cbwinslow/Documents/mcp-server/.autoclaude/config.json",
         "relativePath": ".autoclaude/config.json",
         "size": 3292,
-        "lastModified": "2025-09-15T03:13:43.976Z",
+        "lastModified": "2025-09-18T08:29:32.829Z",
         "hash": "7c852d4e074a92f52b6d1172d4fc3192",
         "language": "json"
       },
@@ -811,26 +826,11 @@
         "language": "json"
       },
       {
-        "path": "/home/cbwinslow/Documents/mcp-server/pyproject.toml",
-        "relativePath": "pyproject.toml",
-        "size": 2453,
-        "lastModified": "2025-09-14T16:06:41.120Z",
-        "hash": "d5c004943a5f9e61fbcc2fe5029e5a6b"
-      },
-      {
         "path": "/home/cbwinslow/Documents/mcp-server/.autoclaude/CLAUDE_CONTEXT.md",
         "relativePath": ".autoclaude/CLAUDE_CONTEXT.md",
-        "size": 2421,
-        "lastModified": "2025-09-15T03:13:44.848Z",
-        "hash": "e1087256de231075671c0d46ad6e8e08",
-        "language": "markdown"
-      },
-      {
-        "path": "/home/cbwinslow/Documents/mcp-server/docs/DEPLOYMENT.md",
-        "relativePath": "docs/DEPLOYMENT.md",
-        "size": 1679,
-        "lastModified": "2025-09-15T03:11:07.829Z",
-        "hash": "53251dc772ebb30faef7232277b8b0b2",
+        "size": 2453,
+        "lastModified": "2025-09-18T11:59:33.234Z",
+        "hash": "a293e0a5600b7e3c3216830109cc3c23",
         "language": "markdown"
       }
     ]
